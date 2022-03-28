@@ -1,0 +1,20 @@
+---
+title: "Group Project 4 COVID"
+author: 'covid_p11'
+date: '2022-03-28'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(maps)
+library(plotly)
+library(caret)
+```
+
+```{r}
+covid = read.csv("owid-covid-data")
+glimpse(covid)
+```
+
