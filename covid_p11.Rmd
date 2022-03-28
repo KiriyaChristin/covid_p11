@@ -27,5 +27,8 @@ unique(covid2$location)
 ```
 
 # Impact on finicial market
+```{r}
+print(123)
+```
 
 # relationship between new cases and vaccination
