@@ -13,8 +13,19 @@ library(plotly)
 library(caret)
 ```
 
+Topic: COVID-19 New cases and finicial market
+visualisation dashboard: Shiny app
 ```{r}
 covid = read.csv("owid-covid-data.csv")
 glimpse(covid)
 ```
+data clean
+```{r}
+covid2 = covid %>% drop_na(new_cases, new_cases_smoothed, total_deaths, new_deaths, new_deaths_smoothed, total_cases_per_million, new_cases_per_million, new_cases_smoothed_per_million, total_deaths_per_million, new_deaths_per_million, new_deaths_smoothed_per_million, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age,extreme_poverty, new_tests)
+glimpse(covid2)
+unique(covid2$location)
+```
 
+# Impact on finicial market
+
+# relationship between new cases and vaccination
