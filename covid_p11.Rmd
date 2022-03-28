@@ -14,7 +14,7 @@ library(caret)
 ```
 
 ```{r}
-covid = read.csv("owid-covid-data")
+covid = read.csv("owid-covid-data.csv")
 glimpse(covid)
 ```
 
