@@ -37,3 +37,7 @@ print('123')
 print(456)
 ```
 
+```{r}
+covid <- owid_covid_data
+```
+
