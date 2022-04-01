@@ -17,7 +17,7 @@ library(dplyr)
 Topic: COVID-19 New cases and finicial market
 visualisation dashboard: Shiny app
 ```{r}
-covid = read.csv("owid-covid-data.csv")
+covid = read.csv("D:/data/owid-covid-data.csv")
 glimpse(covid)
 ```
 data clean
@@ -28,66 +28,29 @@ unique(covid2$location)
 ```
 
 # Impact on finicial market
-```{r}
-print(123)
-```
 
 # relationship between new cases and vaccination
-```{r}
-print('123')
-print(456)
-```
 
-
-
-
-
-
-
-
-```{r}
-# Basic box plot
-ggplot(covid, aes(x=new_cases_smoothed, y=hosp_patients, na.rm = T)) + 
-  geom_boxplot()
-
-```
-
-
-
-```{r}
-boxplot(covid$new_cases_smoothed)
-```
-
-
-
+# Initial analysis for new_cases_smoothed
 ```{r}
 covid1 <- covid2
 covid1$month <- strftime(covid1$date, "%m")
 covid1$year  <- strftime(covid1$date, "%Y")
-covid1$month
-covid1$year
 
 covid1_aggregate <- aggregate(new_cases_smoothed~month+year, 
                   covid1,
                   FUN = sum)
-column_my <- covid1 %>% mutate(month_year = as.Date(covid1$date,  format="%y-%m"))
-column_my
-
 ```
+
 ```{r}
 covid1_aggregate$concatenated <- paste(covid1_aggregate$month, covid1_aggregate$year)
 
-covid2 <- covid1_aggregate %>% mutate(month_year = as.Date(covid1_aggregate$concatenated,  format="%m-%y"))
+covid3 <- covid1_aggregate %>% mutate(month_year = as.Date(covid1_aggregate$concatenated,  format="%m-%y"))
 
 ```
 
 ```{r}
 ggplot(covid1_aggregate, aes(x= new_cases_smoothed, y= concatenated)) +
   geom_bar(stat = 'identity')
-```
-
-```{r}
-class(covid1_aggregate$new_cases_smoothed)
-\
 ```
 
