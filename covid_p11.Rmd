@@ -17,7 +17,7 @@ library(dplyr)
 Topic: COVID-19 New cases and finicial market
 visualisation dashboard: Shiny app
 ```{r}
-covid = read.csv("D:/data/owid-covid-data.csv")
+covid = read.csv("owid-covid-data.csv")
 glimpse(covid)
 ```
 data clean
@@ -54,3 +54,4 @@ ggplot(covid1_aggregate, aes(x= new_cases_smoothed, y= concatenated)) +
   geom_bar(stat = 'identity')
 ```
 
+Analysis: From the above barplot, we set different months of 2021 and 2022 as y-axis and the number of smoothed new cases as x-axis. We can easily know that smoothed new cases in most month is less than 30,000,000 except in Jan, 2022. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
