@@ -14,17 +14,18 @@ library(caret)
 library(dplyr)
 ```
 
-Topic: COVID-19 New cases and finicial market
+Topic: COVID-19 New cases
 visualisation dashboard: Shiny app
 ```{r}
 covid = read.csv("owid-covid-data.csv")
 glimpse(covid)
 ```
-data clean
+
+# data clean
 ```{r}
-covid2 = covid %>% drop_na(new_cases, new_cases_smoothed, total_deaths, new_deaths, new_deaths_smoothed, total_cases_per_million, new_cases_per_million, new_cases_smoothed_per_million, total_deaths_per_million, new_deaths_per_million, new_deaths_smoothed_per_million, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age,extreme_poverty, new_tests)
-glimpse(covid2)
-unique(covid2$location)
+covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, total_deaths, new_deaths, new_deaths_smoothed, total_cases_per_million, new_cases_per_million, new_cases_smoothed_per_million, total_deaths_per_million, new_deaths_per_million, new_deaths_smoothed_per_million, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age,extreme_poverty, new_tests, new_people_vaccinated_smoothed)
+glimpse(covid_clean)
+unique(covid_clean$location)
 ```
 
 # Impact on finicial market
@@ -33,25 +34,36 @@ unique(covid2$location)
 
 # Initial analysis for new_cases_smoothed
 ```{r}
-covid1 <- covid2
-covid1$month <- strftime(covid1$date, "%m")
-covid1$year  <- strftime(covid1$date, "%Y")
+covid_temp <- covid_clean
+covid_temp$month <- strftime(covid_temp$date, "%m")
+covid_temp$year  <- strftime(covid_temp$date, "%Y")
 
-covid1_aggregate <- aggregate(new_cases_smoothed~month+year, 
-                  covid1,
-                  FUN = sum)
+covid_temp_new_case_aggregate <- aggregate(new_cases_smoothed~month+year, 
+                  covid_temp,
+                  FUN = mean)
+covid_temp_new_case_aggregate$month_year <- paste(covid_temp_new_case_aggregate$month, covid_temp_new_case_aggregate$year)
 ```
 
 ```{r}
-covid1_aggregate$concatenated <- paste(covid1_aggregate$month, covid1_aggregate$year)
+ggplot(covid_temp_new_case_aggregate, aes(x= new_cases_smoothed, y= month_year)) +
+  geom_bar(stat = 'identity') + ggtitle("Average New Cases (Smoothed) per Month") +
+  ylab("month year") + xlab("average new cases")
+```
 
-covid3 <- covid1_aggregate %>% mutate(month_year = as.Date(covid1_aggregate$concatenated,  format="%m-%y"))
+Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most month is less than 30,000,000 except in Jan, 2022. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
 
+# Initial analysis for new_people_vaccinated_smoothed
+```{r}
+covid_temp = covid_clean %>% select(date,new_people_vaccinated_smoothed)
+covid_temp$date <- as.Date(covid_temp$date, format = "%Y-%m-%d")
+covid_temp_new_vaccinated_aggregate = covid_temp %>% mutate(month_year = as.character(format(date, "%m-%Y"))) %>%
+          group_by(month_year) %>%
+  summarise(date=date[1], number = mean(new_people_vaccinated_smoothed))
+covid_temp_new_vaccinated_aggregate  
 ```
 
 ```{r}
-ggplot(covid1_aggregate, aes(x= new_cases_smoothed, y= concatenated)) +
-  geom_bar(stat = 'identity')
+ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
+  geom_bar(stat = 'identity') + ggtitle("Average New People Vaccinated (Smoothed) per Month") +
+  ylab("month year") + xlab("average new people vaccinated")
 ```
-
-Analysis: From the above barplot, we set different months of 2021 and 2022 as y-axis and the number of smoothed new cases as x-axis. We can easily know that smoothed new cases in most month is less than 30,000,000 except in Jan, 2022. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
