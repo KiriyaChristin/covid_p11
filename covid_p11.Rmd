@@ -2,7 +2,15 @@
 title: "Group Project 4 COVID"
 author: 'covid_p11'
 date: '2022-03-28'
-output: html_document
+output:
+  html_document:
+    toc: true
+    number_sections: false
+    theme: flatly
+    highlight: tango
+    toc_float: true
+    toc_depth: 4
+    code_folding: hide
 ---
 
 ```{r setup, include=FALSE}
@@ -50,7 +58,7 @@ ggplot(covid_temp_new_case_aggregate, aes(x= new_cases_smoothed, y= month_year))
   ylab("month year") + xlab("average new cases")
 ```
 
-Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most months are less than 30,000 except in Jan, 2022, which is nearly 50,000. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
+- Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most months are less than 30,000 except in Jan, 2022, which is nearly 50,000. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
 
 # Initial analysis for new_people_vaccinated_smoothed
 ```{r}
@@ -67,3 +75,5 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
   geom_bar(stat = 'identity') + ggtitle("Average New People Vaccinated (Smoothed) per Month") +
   ylab("month year") + xlab("average new people vaccinated")
 ```
+
+- Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
