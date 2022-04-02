@@ -50,7 +50,7 @@ ggplot(covid_temp_new_case_aggregate, aes(x= new_cases_smoothed, y= month_year))
   ylab("month year") + xlab("average new cases")
 ```
 
-Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most month is less than 30,000,000 except in Jan, 2022. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
+Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most months are less than 30,000 except in Jan, 2022, which is nearly 50,000. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
 
 # Initial analysis for new_people_vaccinated_smoothed
 ```{r}
