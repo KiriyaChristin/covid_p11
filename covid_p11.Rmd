@@ -13,6 +13,7 @@ output:
     code_folding: hide
 ---
 
+# Topic
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(ggplot2)
@@ -22,25 +23,39 @@ library(caret)
 library(dplyr)
 ```
 
-Topic: COVID-19 New cases
+Question: Investigate the impact of COVID-19 on country specific public equity markets and the respective country economy.
+Perform a geographical plot with visualizing changes in public equity and covid cases
+Is there a relationship between equity market recovery and vaccine rollout
+is this the same for commodities?
+is this the same for crypto?
+Identify potential relationship between cases and stocks/ death and stocks
+can build a ML model to predict stock market with covid-data
+
+
+death and stocks
+comparison with commodities (gold, oil ect).
+comparison with crypto
+Is there a relationship between equity market recovery and vaccine rollout.
+
 visualisation dashboard: Shiny app
+
 ```{r}
 covid = read.csv("owid-covid-data.csv")
 glimpse(covid)
 ```
 
+
+
+
 # data clean
 ```{r}
-covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, total_deaths, new_deaths, new_deaths_smoothed, total_cases_per_million, new_cases_per_million, new_cases_smoothed_per_million, total_deaths_per_million, new_deaths_per_million, new_deaths_smoothed_per_million, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age,extreme_poverty, new_tests, new_people_vaccinated_smoothed)
+covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index)
 glimpse(covid_clean)
 unique(covid_clean$location)
 ```
 
-# Impact on finicial market
-
-# relationship between new cases and vaccination
-
-# Initial analysis for new_cases_smoothed
+# Initial analysis
+## For new_cases_smoothed
 ```{r}
 covid_temp <- covid_clean
 covid_temp$month <- strftime(covid_temp$date, "%m")
@@ -60,7 +75,7 @@ ggplot(covid_temp_new_case_aggregate, aes(x= new_cases_smoothed, y= month_year))
 
 - Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most months are less than 30,000 except in Jan, 2022, which is nearly 50,000. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
 
-# Initial analysis for new_people_vaccinated_smoothed
+## For new_people_vaccinated_smoothed
 ```{r}
 covid_temp = covid_clean %>% select(date,new_people_vaccinated_smoothed)
 covid_temp$date <- as.Date(covid_temp$date, format = "%Y-%m-%d")
@@ -77,3 +92,5 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
 ```
 
 - Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
+
+# geographical plot
