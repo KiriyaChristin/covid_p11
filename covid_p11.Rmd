@@ -24,20 +24,16 @@ library(dplyr)
 ```
 
 Question: Investigate the impact of COVID-19 on country specific public equity markets and the respective country economy.
-Perform a geographical plot with visualizing changes in public equity and covid cases
-Is there a relationship between equity market recovery and vaccine rollout
+1. Perform a geographical plot with visualizing changes in public equity and covid cases over a period of time (probably 2020-2022)
+2. Is there a relationship between equity market recovery (going back to pre-covid prices) and vaccine rollout
 is this the same for commodities?
 is this the same for crypto?
-Identify potential relationship between cases and stocks/ death and stocks
-can build a ML model to predict stock market with covid-data
-
-
-death and stocks
-comparison with commodities (gold, oil ect).
-comparison with crypto
-Is there a relationship between equity market recovery and vaccine rollout.
+3. Identify potential relationship between cases and stocks/ death and stocks
+4. can build a ML model to predict stock market with covid-data. 
 
 visualisation dashboard: Shiny app
+
+stock market data set: https://www.marketwatch.com/investing/index/spx/download-data?startDate=1/1/2020&endDate=03/30/2022
 
 ```{r}
 covid = read.csv("owid-covid-data.csv")
