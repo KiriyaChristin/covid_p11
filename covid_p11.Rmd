@@ -90,3 +90,8 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
 - Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
 
 # geographical plot
+
+```{r}
+#Test commit by maxim
+```
+
