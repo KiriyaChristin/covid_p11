@@ -13,7 +13,6 @@ output:
     code_folding: hide
 ---
 
-# Topic
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(ggplot2)
@@ -24,21 +23,12 @@ library(dplyr)
 library(lubridate)
 ```
 
-Question: Investigate the impact of COVID-19 on country specific public equity markets and the respective country economy.
-1. Perform a geographical plot with visualizing changes in public equity and covid cases over a period of time (probably 2020-2022)
-2. Is there a relationship between equity market recovery (going back to pre-covid prices) and vaccine rollout
-is this the same for commodities?
-is this the same for crypto?
-3. Identify potential relationship between cases and stocks/ death and stocks
-4. can build a ML model to predict stock market with covid-data. 
-
+Topic: COVID-19 New cases
 visualisation dashboard: Shiny app
-
-stock market data set: https://www.marketwatch.com/investing/index/spx/download-data?startDate=1/1/2020&endDate=03/30/2022
-
 ```{r}
 covid = read.csv("owid-covid-data.csv")
 
+<<<<<<< Updated upstream
 # these are indices for each country (an index is just a collection of stocks)
 # 'FileEncoding' just cleans the column encoding for this case
 
@@ -60,10 +50,16 @@ covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations,
 covid_clean$new_cases[covid_clean$new_cases < 0] <- 0
 
 
+=======
+# data clean
+```{r}
+covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, total_deaths, new_deaths, new_deaths_smoothed, total_cases_per_million, new_cases_per_million, new_cases_smoothed_per_million, total_deaths_per_million, new_deaths_per_million, new_deaths_smoothed_per_million, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age,extreme_poverty, new_tests, new_people_vaccinated_smoothed)
+>>>>>>> Stashed changes
 glimpse(covid_clean)
 unique(covid_clean$location)
 ```
 
+<<<<<<< Updated upstream
 # performing join
 ```{r}
 # using a copy just in case
@@ -114,6 +110,13 @@ covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
 
 # Initial analysis
 ## For new_cases_smoothed
+=======
+# Impact on finicial market
+
+# relationship between new cases and vaccination
+
+# Initial analysis for new_cases_smoothed
+>>>>>>> Stashed changes
 ```{r}
 covid_temp <- covid_clean
 covid_temp$month <- strftime(covid_temp$date, "%m")
@@ -125,6 +128,8 @@ covid_temp_new_case_aggregate <- aggregate(new_cases_smoothed~month+year,
 covid_temp_new_case_aggregate$month_year <- paste(covid_temp_new_case_aggregate$month, covid_temp_new_case_aggregate$year)
 ```
 
+
+
 ```{r}
 ggplot(covid_temp_new_case_aggregate, aes(x= new_cases_smoothed, y= month_year)) +
   geom_bar(stat = 'identity') + ggtitle("Average New Cases (Smoothed) per Month") +
@@ -133,7 +138,7 @@ ggplot(covid_temp_new_case_aggregate, aes(x= new_cases_smoothed, y= month_year))
 
 - Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most months are less than 30,000 except in Jan, 2022, which is nearly 50,000. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
 
-## For new_people_vaccinated_smoothed
+# Initial analysis for new_people_vaccinated_smoothed
 ```{r}
 covid_temp = covid_clean %>% select(date,new_people_vaccinated_smoothed)
 covid_temp$date <- as.Date(covid_temp$date, format = "%Y-%m-%d")
@@ -149,6 +154,7 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
   ylab("month year") + xlab("average new people vaccinated")
 ```
 
+<<<<<<< Updated upstream
 - Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
 
 # geographical plot
@@ -157,3 +163,6 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
 
 ```
 
+=======
+- Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
+>>>>>>> Stashed changes
