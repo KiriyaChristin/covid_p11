@@ -28,7 +28,6 @@ visualisation dashboard: Shiny app
 ```{r}
 covid = read.csv("owid-covid-data.csv")
 
-<<<<<<< Updated upstream
 # these are indices for each country (an index is just a collection of stocks)
 # 'FileEncoding' just cleans the column encoding for this case
 
@@ -49,18 +48,19 @@ covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations,
 #This code changes the negative case values in the data set to zero
 covid_clean$new_cases[covid_clean$new_cases < 0] <- 0
 
-
-=======
-# data clean
-```{r}
-covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, total_deaths, new_deaths, new_deaths_smoothed, total_cases_per_million, new_cases_per_million, new_cases_smoothed_per_million, total_deaths_per_million, new_deaths_per_million, new_deaths_smoothed_per_million, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age,extreme_poverty, new_tests, new_people_vaccinated_smoothed)
->>>>>>> Stashed changes
 glimpse(covid_clean)
 unique(covid_clean$location)
 ```
 
-<<<<<<< Updated upstream
+# Question 1
+
+```{r}
+#code for more optimised join (to be pasted later)
+```
+
+
 # performing join
+
 ```{r}
 # using a copy just in case
 covid2 <- covid_clean
@@ -105,18 +105,18 @@ df_5 = inner_join(SSEC, covid_CHN, by = "Date")
 covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
 
 # Still need transform relevant column to numeric ect...will do a little later 
+
+df_aus <- df_3
 ```
 
-
-# Initial analysis
 ## For new_cases_smoothed
-=======
+
 # Impact on finicial market
 
 # relationship between new cases and vaccination
 
 # Initial analysis for new_cases_smoothed
->>>>>>> Stashed changes
+
 ```{r}
 covid_temp <- covid_clean
 covid_temp$month <- strftime(covid_temp$date, "%m")
@@ -127,7 +127,6 @@ covid_temp_new_case_aggregate <- aggregate(new_cases_smoothed~month+year,
                   FUN = mean)
 covid_temp_new_case_aggregate$month_year <- paste(covid_temp_new_case_aggregate$month, covid_temp_new_case_aggregate$year)
 ```
-
 
 
 ```{r}
@@ -154,15 +153,18 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
   ylab("month year") + xlab("average new people vaccinated")
 ```
 
-<<<<<<< Updated upstream
 - Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
 
 # geographical plot
 
 ```{r}
+glimpse(df_aus)
+df_aus_subset = df_aus %>% select(Price, new_cases)
+df_aus_subset$Price <- as.numeric(gsub(",","",df_aus_subset$Price))
+df_aus_subset
 
+M0 = lm(Price ~ new_cases, data = df_aus_subset) # Null model
+summary(M0)
 ```
 
-=======
 - Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
->>>>>>> Stashed changes
