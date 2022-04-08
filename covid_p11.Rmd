@@ -31,11 +31,11 @@ covid = read.csv("owid-covid-data.csv")
 # these are indices for each country (an index is just a collection of stocks)
 # 'FileEncoding' just cleans the column encoding for this case
 
-sp500 = read.csv("SPY Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for US
-TOPIX = read.csv("TOPIX Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Japan
+#sp500 = read.csv("SPY Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for US
+#TOPIX = read.csv("TOPIX Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Japan
 ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Australia
-NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for India
-SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
+#NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for India
+#SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
 
 glimpse(covid)
 ```
@@ -43,7 +43,7 @@ glimpse(covid)
 # data clean
 ```{r}
 #Dropping NA
-covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index)
+covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths)
 
 #This code changes the negative case values in the data set to zero
 covid_clean$new_cases[covid_clean$new_cases < 0] <- 0
@@ -65,11 +65,11 @@ unique(covid_clean$location)
 # using a copy just in case
 covid2 <- covid_clean
 
-sp500$Date = mdy(sp500$Date)
-TOPIX$Date = mdy(TOPIX$Date)
+#sp500$Date = mdy(sp500$Date)
+#TOPIX$Date = mdy(TOPIX$Date)
 ASX200$Date = mdy(ASX200$Date)
-NSEI$Date = mdy(NSEI$Date)
-SSEC$Date = mdy(SSEC$Date)
+#NSEI$Date = mdy(NSEI$Date)
+#SSEC$Date = mdy(SSEC$Date)
 covid2$date = ymd(covid2$date)
 
 #Temporarily changing the date to character as joining cannot be done with date objects
@@ -77,32 +77,32 @@ covid2$date = ymd(covid2$date)
 covid2 <- covid2 %>%
   transform(covid2, date = as.character(date)) %>% 
   select(date, new_cases, new_deaths, location, new_vaccinations)
-sp500$Date <- as.character(sp500$Date)
-TOPIX$Date <- as.character(TOPIX$Date)
+#sp500$Date <- as.character(sp500$Date)
+#TOPIX$Date <- as.character(TOPIX$Date)
 ASX200$Date <- as.character(ASX200$Date)
-NSEI$Date <- as.character(NSEI$Date)
-SSEC$Date <- as.character(SSEC$Date)
+#NSEI$Date <- as.character(NSEI$Date)
+#SSEC$Date <- as.character(SSEC$Date)
 
 # renaming column so it has same name as the stock market data frames for joining later
 colnames(covid2)[1] = "Date"
 
 # making data frames for each country we select to perform individual joins on each to their respective stock market index
-covid_US <- covid2 %>% filter(location == "United States")
+#covid_US <- covid2 %>% filter(location == "United States")
 covid_AUS <- covid2 %>% filter(location == "Australia")
-covid_IND <- covid2 %>% filter(location == "India")
-covid_JPN <- covid2 %>% filter(location == "Japan")
-covid_CHN <- covid2 %>% filter(location == "China")
+#covid_IND <- covid2 %>% filter(location == "India")
+#covid_JPN <- covid2 %>% filter(location == "Japan")
+#covid_CHN <- covid2 %>% filter(location == "China")
 
 # performing joins 
-df_1 = inner_join(sp500, covid_US, by = "Date")
-df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
+#df_1 = inner_join(sp500, covid_US, by = "Date")
+#df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
 df_3 = inner_join(ASX200, covid_AUS, by = "Date")
-df_4 = inner_join(NSEI, covid_IND, by = "Date")
-df_5 = inner_join(SSEC, covid_CHN, by = "Date")
+#df_4 = inner_join(NSEI, covid_IND, by = "Date")
+#df_5 = inner_join(SSEC, covid_CHN, by = "Date")
 
 # vertically joined data set (now one column will store all the values of the respective country index)
 # e.g US stores prices relevant to S&P500 and China's prices are relevant to the the SSEC which is based in Shanghai.
-covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
+#covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
 
 # Still need transform relevant column to numeric ect...will do a little later 
 
@@ -110,7 +110,7 @@ df_aus <- df_3
 
 #transformation
 df_aus$Date = as.Date(df_aus$Date)
-df_aus$Price = as.numeric(gsub(",","",df_aus_subset$Price))
+df_aus$Price = as.numeric(gsub(",","",df_aus$Price))
 
 df_aus
 ```
@@ -164,7 +164,7 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
 # geographical plot
 
 ```{r}
-glimpse(df_aus)
+#glimpse(df_aus)
 df_aus_subset = df_aus %>% select(Price, new_cases)
 df_aus_subset
 
@@ -172,4 +172,5 @@ M0 = lm(Price ~ new_cases, data = df_aus_subset) # Null model
 summary(M0)
 ```
 
-- Analysis(Paul): We build a linear model here to explore relationship between stock prices and new cases of covid-19. The dependent variable here is stock prices while independent variable is new cases. We can find that p-value for new cases is 0.152, which is smaller than 0.05, indicating that it is a significant variable. The final model we get is Price = 8.8e-04*new_cases + 7.2e+03.
+- Analysis(Paul and Christin): We build a linear model here to explore relationship between stock prices and new cases of covid-19. The dependent variable here is stock prices while independent variable is new cases. Although the r-squared value is quite low and Residual standard error is a bit high, which indicates our model is not good, the p-value for new cases is 0.044( < 0.05), so it is a significantly influence Price. The final model we get is $\text{Price} = 1.166e^{-03}\times \text{new_cases} + 7.223e^{03}$.
+
