@@ -172,4 +172,4 @@ M0 = lm(Price ~ new_cases, data = df_aus_subset) # Null model
 summary(M0)
 ```
 
-- Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
+- Analysis(Paul): We build a linear model here to explore relationship between stock prices and new cases of covid-19. The dependent variable here is stock prices while independent variable is new cases. We can find that p-value for new cases is 0.152, which is smaller than 0.05, indicating that it is a significant variable. The final model we get is Price = 8.8e-04*new_cases + 7.2e+03.
