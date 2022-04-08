@@ -147,7 +147,7 @@ covid_temp_new_vaccinated_aggregate = covid_temp %>% mutate(month_year = as.char
 covid_temp_new_vaccinated_aggregate  
 ```
 
-```{r}
+```{r, warning=FALSE}
 ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
   geom_bar(stat = 'identity') + ggtitle("Average New People Vaccinated (Smoothed) per Month") +
   ylab("month year") + xlab("average new people vaccinated")
