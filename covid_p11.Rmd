@@ -107,6 +107,12 @@ covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
 # Still need transform relevant column to numeric ect...will do a little later 
 
 df_aus <- df_3
+
+#transformation
+df_aus$Date = as.Date(df_aus$Date)
+df_aus$Price = as.numeric(gsub(",","",df_aus_subset$Price))
+
+df_aus
 ```
 
 ## For new_cases_smoothed
@@ -160,7 +166,6 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
 ```{r}
 glimpse(df_aus)
 df_aus_subset = df_aus %>% select(Price, new_cases)
-df_aus_subset$Price <- as.numeric(gsub(",","",df_aus_subset$Price))
 df_aus_subset
 
 M0 = lm(Price ~ new_cases, data = df_aus_subset) # Null model
