@@ -174,3 +174,41 @@ summary(M0)
 
 - Analysis(Paul and Christin): We build a linear model here to explore relationship between stock prices and new cases of covid-19. The dependent variable here is stock prices while independent variable is new cases. Although the r-squared value is quite low and Residual standard error is a bit high, which indicates our model is not good, the p-value for new cases is 0.044( < 0.05), so it is a significantly influence Price. The final model we get is $\text{Price} = 1.166e^{-03}\times \text{new_cases} + 7.223e^{03}$.
 
+Filter the zeros
+```{r}
+# df_aus_subset = df_aus %>% select(Price, new_deaths) %>% filter(new_deaths != 0)
+```
+
+New deaths and prices 
+```{r}
+df_aus_subset = df_aus %>% select(Price, new_deaths)
+df_aus_subset
+
+M0 = lm(Price ~ new_deaths, data = df_aus_subset) # Null model
+summary(M0)
+```
+
+```{r}
+
+ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_point() + ggtitle("Prices of stocks and against new death (Smoothed)") + ylab("New deaths") + xlab("Price")
+```
+
+```{r}
+ggplot(data = df_3, mapping = aes(x = Price, y = new_cases)) + geom_point() + ggtitle("Prices of stocks and against new cases (Smoothed)") + ylab("New cases") + xlab("Price")
+```
+```{r}
+df_aus_subset = df_aus %>% select(Price, new_vaccinations)
+df_aus_subset
+
+M0 = lm(Price ~ new_vaccinations
+        , data = df_aus_subset) # Null model
+summary(M0)
+
+```
+
+
+```{r}
+ggplot(data = df_3, mapping = aes(x = Price, y = new_vaccinations)) + geom_point() + ggtitle("Prices of stocks and against new vaccinations (Smoothed)") + ylab("New vaccinations") + xlab("Price")
+```
+
+
