@@ -174,3 +174,25 @@ summary(M0)
 
 - Analysis(Paul and Christin): We build a linear model here to explore relationship between stock prices and new cases of covid-19. The dependent variable here is stock prices while independent variable is new cases. Although the r-squared value is quite low and Residual standard error is a bit high, which indicates our model is not good, the p-value for new cases is 0.044( < 0.05), so it is a significantly influence Price. The final model we get is $\text{Price} = 1.166e^{-03}\times \text{new_cases} + 7.223e^{03}$.
 
+Scatter Plot for price and new_cases
+
+
+```{r}
+df_aus = df_aus[order(as.Date(df_aus$Date, format="%d/%m/%Y")),]
+df_aus
+```
+
+```{r}
+y <- df_aus$Price
+x <- df_aus$new_cases
+
+plot(x, y, main = "Price ~ New Cases",
+     ylab = "Price", xlab = "new_cases",
+     pch = 19, frame = FALSE)
+# Add regression line
+plot(x, y, main = "Price ~ New Cases",
+     ylab = "Price", xlab = "new_cases",
+     pch = 19, frame = FALSE)
+abline(lm(y ~ x, data = df_aus), col = "blue")
+```
+
