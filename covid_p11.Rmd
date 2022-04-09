@@ -225,7 +225,7 @@ summary(M0)
 
 ```
 
-
+2333
 ```{r}
 ggplot(data = df_aus, mapping = aes(x = Price, y = new_vaccinations)) + geom_point() + ggtitle("Prices of stocks and against new vaccinations (Smoothed)") + ylab("New vaccinations") + xlab("Price")
 ```
