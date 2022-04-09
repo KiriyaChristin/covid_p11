@@ -1,6 +1,0 @@
-"0","y <- df_aus$Price"
-"0","x <- df_aus$new_cases"
-"0",""
-"0","plot(x, y, main = ""Price ~ New Cases"","
-"0","     ylab = ""Price"", xlab = ""new_cases"","
-"0","     pch = 19, frame = FALSE)"

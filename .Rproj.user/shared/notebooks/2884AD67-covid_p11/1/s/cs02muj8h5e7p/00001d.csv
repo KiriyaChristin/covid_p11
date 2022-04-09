@@ -1,4 +1,0 @@
-"0","# Add regression line"
-"0","plot(x, y, main = ""Price ~ New Cases"","
-"0","     ylab = ""Price"", xlab = ""new_cases"","
-"0","     pch = 19, frame = FALSE)"
