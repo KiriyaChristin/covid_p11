@@ -234,9 +234,9 @@ ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_po
 df_aus_subset = df_aus %>% select(Price, new_vaccinations)
 df_aus_subset
 
-M0 = lm(Price ~ new_vaccinations
+M1 = lm(Price ~ new_vaccinations
         , data = df_aus_subset) # Null model
-summary(M0)
+summary(M1)
 
 ```
 
@@ -248,9 +248,9 @@ ggplot(data = df_aus, mapping = aes(x = Price, y = new_vaccinations)) + geom_poi
 ```{r}
 df_aus_subset = df_aus %>% select(Price, new_tests)
 df_aus_subset
-M0 = lm(Price ~ new_tests
+M2 = lm(Price ~ new_tests
         , data = df_aus_subset) # Null model
-summary(M0)
+summary(M2)
 ```
 
 ```{r}
@@ -269,5 +269,18 @@ df_aus$Price_mul30 = df_aus$Price*30
 p1 = ggplot(data = df_aus) + geom_line(aes(x=date, y = new_cases), color = "red") + geom_line(aes(x=date, y = new_vaccinations), color = "light green") + geom_line(aes(x=date, y = new_tests), color = "light blue") +
   geom_line(aes(x=date, y = Price_mul30), color = "blue") + theme_bw()
 ggplotly(p1)
+```
+
+```{r}
+M = lm(Price ~ new_tests + new_tests + new_vaccinations
+        , data = df_aus)
+library(ggfortify)
+autoplot(M, which = 1:2)
+```
+
+```{r}
+autoplot(M0, which = 1:2)
+autoplot(M1, which = 1:2)
+autoplot(M2, which = 1:2)
 ```
 
