@@ -272,10 +272,14 @@ ggplotly(p1)
 ```
 
 ```{r}
-M = lm(Price ~ new_tests + new_tests + new_vaccinations
+M = lm(Price ~ new_cases + new_tests + new_vaccinations
         , data = df_aus)
+summary(M)
+M_Q2 = lm(Price ~ new_tests + new_vaccinations
+        , data = df_aus)
+summary(M_Q2)
 library(ggfortify)
-autoplot(M, which = 1:2)
+autoplot(M_Q2, which = 1:2)
 ```
 
 ```{r}
