@@ -21,6 +21,9 @@ library(plotly)
 library(caret)
 library(dplyr)
 library(lubridate)
+library("scales")
+library("magrittr")
+library("tidyr")
 ```
 
 Topic: COVID-19 New cases
@@ -37,25 +40,35 @@ ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM')
 #NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for India
 #SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
 
-glimpse(covid)
+colnames(covid)
 ```
 
 # data clean
 ```{r}
 #Dropping NA
-covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests)
+covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, weekly_icu_admissions_per_million, weekly_icu_admissions)
 
 #This code changes the negative case values in the data set to zero
 covid_clean$new_cases[covid_clean$new_cases < 0] <- 0
 
-glimpse(covid_clean)
-unique(covid_clean$location)
+covid_AUS <- covid %>% filter(location == "Australia")
+covid_clean_AUS = covid_AUS %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests)
+
+#This code changes the negative case values in the data set to zero
+covid_clean_AUS$new_cases[covid_clean_AUS$new_cases < 0] <- 0
+view(covid_clean_AUS)
+
+#glimpse(covid_clean)
+#covid_clean$date = as.Date(covid_clean$date)
+#max(covid_clean$date)
+#unique(covid_clean$location)
 ```
 
 # Question 1
 
 ```{r}
 #code for more optimised join (to be pasted later)
+class(covid_clean$date)
 ```
 
 
@@ -63,11 +76,11 @@ unique(covid_clean$location)
 
 ```{r}
 # using a copy just in case
-covid2 <- covid_clean
+covid2 <- covid_clean_AUS
 
 #sp500$Date = mdy(sp500$Date)
 #TOPIX$Date = mdy(TOPIX$Date)
-ASX200$Date = mdy(ASX200$Date)
+ASX200$date = mdy(ASX200$Date)
 #NSEI$Date = mdy(NSEI$Date)
 #SSEC$Date = mdy(SSEC$Date)
 covid2$date = ymd(covid2$date)
@@ -76,15 +89,15 @@ covid2$date = ymd(covid2$date)
 #Also selecting relevant columns for analysis later
 covid2 <- covid2 %>%
   transform(covid2, date = as.character(date)) %>% 
-  select(date, new_cases, new_deaths, location, new_vaccinations, new_tests)
+  select(date, new_cases, new_deaths, location, new_vaccinations, new_tests, population, population_density)
 #sp500$Date <- as.character(sp500$Date)
 #TOPIX$Date <- as.character(TOPIX$Date)
-ASX200$Date <- as.character(ASX200$Date)
+ASX200$date <- as.character(ASX200$date)
 #NSEI$Date <- as.character(NSEI$Date)
 #SSEC$Date <- as.character(SSEC$Date)
 
 # renaming column so it has same name as the stock market data frames for joining later
-colnames(covid2)[1] = "Date"
+#colnames(covid2)[1] = "Date"
 
 # making data frames for each country we select to perform individual joins on each to their respective stock market index
 #covid_US <- covid2 %>% filter(location == "United States")
@@ -96,7 +109,7 @@ covid_AUS <- covid2 %>% filter(location == "Australia")
 # performing joins 
 #df_1 = inner_join(sp500, covid_US, by = "Date")
 #df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
-df_3 = inner_join(ASX200, covid_AUS, by = "Date")
+df_3 = inner_join(ASX200, covid_AUS, by = "date")
 #df_4 = inner_join(NSEI, covid_IND, by = "Date")
 #df_5 = inner_join(SSEC, covid_CHN, by = "Date")
 
@@ -109,7 +122,7 @@ df_3 = inner_join(ASX200, covid_AUS, by = "Date")
 df_aus <- df_3
 
 #transformation
-df_aus$Date = as.Date(df_aus$Date)
+df_aus$date = as.Date(df_aus$date)
 df_aus$Price = as.numeric(gsub(",","",df_aus$Price))
 
 df_aus
@@ -161,9 +174,9 @@ ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
 
 - Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
 
-# geographical plot
-
-```{r}
+# Q2 a
+## Price ~ new_cases
+```{r, warning=FALSE}
 #glimpse(df_aus)
 df_aus_subset = df_aus %>% select(Price, new_cases)
 df_aus_subset
@@ -178,8 +191,9 @@ Scatter Plot for price and new_cases
 
 
 ```{r}
-df_aus = df_aus[order(as.Date(df_aus$Date, format="%d/%m/%Y")),]
+df_aus = df_aus[order(as.Date(df_aus$date, format="%d/%m/%Y")),]
 df_aus
+write.csv(df_aus,"df_aus.csv")
 ```
 
 ```{r}
@@ -201,9 +215,9 @@ Filter the zeros
 # df_aus_subset = df_aus %>% select(Price, new_deaths) %>% filter(new_deaths != 0)
 ```
 
-New deaths and prices 
+## New deaths and prices 
 ```{r}
-df_aus_subset = df_aus %>% select(Price, new_deaths)
+df_aus_subset = df_aus %>% select(Price, new_deaths, new_vaccinations, new_cases)
 df_aus_subset
 
 M0 = lm(Price ~ new_deaths, data = df_aus_subset) # Null model
@@ -211,21 +225,86 @@ summary(M0)
 ```
 
 ```{r}
-
+<<<<<<< HEAD
 ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_point() + ggtitle("Prices of stocks and against new death (Smoothed)") + ylab("New deaths") + xlab("Price")
+=======
+
+ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_point() + ggtitle("Prices of stocks and against new death") + ylab("New deaths") + xlab("Price")
+>>>>>>> 6587750a5b45ad2819cd2b39a578049c1c213b2c
 ```
 
+## Price ~ new_vaccinations
 ```{r}
 df_aus_subset = df_aus %>% select(Price, new_vaccinations)
 df_aus_subset
 
-M0 = lm(Price ~ new_vaccinations
+M1 = lm(Price ~ new_vaccinations
         , data = df_aus_subset) # Null model
-summary(M0)
+summary(M1)
 
 ```
 
-2333
 ```{r}
+<<<<<<< HEAD
 ggplot(data = df_aus, mapping = aes(x = Price, y = new_vaccinations)) + geom_point() + ggtitle("Prices of stocks and against new vaccinations (Smoothed)") + ylab("New vaccinations") + xlab("Price")
 ```
+
+```{r}
+ggplot(data = df_aus_subset, mapping = aes(x = new_vaccinations, y = new_cases)) + geom_point() + ggtitle("New vaccinations against new cases(Smoothed)") + ylab("New cases") + xlab("New vaccinations")
+```
+
+```{r}
+df_aus_subset = df_aus %>% select(Price, new_tests)
+df_aus_subset
+M0 = lm(Price ~ new_tests
+        , data = df_aus_subset) # Null model
+summary(M0)
+=======
+ggplot(data = df_aus, mapping = aes(x = Price, y = new_vaccinations)) + geom_point() + ggtitle("Prices of stocks and against new vaccinations") + ylab("New vaccinations") + xlab("Price")
+```
+
+## Price ~ New tests
+```{r}
+df_aus_subset = df_aus %>% select(Price, new_tests)
+df_aus_subset
+M2 = lm(Price ~ new_tests
+        , data = df_aus_subset) # Null model
+summary(M2)
+```
+
+```{r}
+ggplot(data = df_aus, mapping = aes(x = Price, y = new_tests)) + geom_point() + ggtitle("Prices of stocks against new tests") + ylab("New tests") + xlab("Price")
+```
+
+```{r}
+ggplot(data = df_aus, mapping = aes(x = Price, y = population)) + geom_point() + ggtitle("Prices of stocks against population") + ylab("New tests") + xlab("Price")
+ggplot(data = df_aus, mapping = aes(x = Price, y = population_density)) + geom_point() + ggtitle("Prices of stocks against population density") + ylab("New tests") + xlab("Price")
+ggplot(data = df_aus, mapping = aes(x = date, y = population_density)) + geom_line() + ggtitle("Prices of stocks against population density") + ylab("New tests") + xlab("Price") # bad
+summary(df_aus$Price)
+```
+
+```{r}
+df_aus$Price_mul30 = df_aus$Price*30
+p1 = ggplot(data = df_aus) + geom_line(aes(x=date, y = new_cases), color = "red") + geom_line(aes(x=date, y = new_vaccinations), color = "light green") + geom_line(aes(x=date, y = new_tests), color = "light blue") +
+  geom_line(aes(x=date, y = Price_mul30), color = "blue") + theme_bw()
+ggplotly(p1)
+```
+
+```{r}
+M = lm(Price ~ new_cases + new_tests + new_vaccinations
+        , data = df_aus)
+summary(M)
+M_Q2 = lm(Price ~ new_tests + new_vaccinations
+        , data = df_aus)
+summary(M_Q2)
+library(ggfortify)
+autoplot(M_Q2, which = 1:2)
+```
+
+```{r}
+autoplot(M0, which = 1:2)
+autoplot(M1, which = 1:2)
+autoplot(M2, which = 1:2)
+>>>>>>> 6587750a5b45ad2819cd2b39a578049c1c213b2c
+```
+
