@@ -264,4 +264,6 @@ ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = logPrice), color = "li
 - The independent variables do no depend on each other too.
 - The errors are independent, normally distributed with mean zero and a constant variance.
 
-
+```{r}
+# test commit code from r studio cloud by maxim
+```
