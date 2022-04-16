@@ -253,7 +253,7 @@ ggplotly(p1)
 ```{r}
 M = lm(logPrice ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_aus)
 summary(M)
-#autoplot(M, which = 1:2)
+autoplot(M, which = 1:2)
 ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = logPrice), color = "light blue") +
   geom_point(aes(x = new_vaccinations, y = logPrice), color = "light green") +
   ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
@@ -263,7 +263,3 @@ ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = logPrice), color = "li
 - The relationship between the dependent variable and any independent variable is linear or curvilinear.
 - The independent variables do no depend on each other too.
 - The errors are independent, normally distributed with mean zero and a constant variance.
-
-```{r}
-# test commit code for r cloud by max (ignore)
-```
