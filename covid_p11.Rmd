@@ -78,11 +78,19 @@ class(covid_clean$date)
 # using a copy just in case
 covid2 <- covid_clean_AUS
 
+<<<<<<< HEAD
 #sp500$Date = mdy(sp500$Date)
 #TOPIX$Date = mdy(TOPIX$Date)
 ASX200$date = mdy(ASX200$Date)
 #NSEI$Date = mdy(NSEI$Date)
 #SSEC$Date = mdy(SSEC$Date)
+=======
+#sp500$date = mdy(sp500$Date)
+#TOPIX$date = mdy(TOPIX$Date)
+ASX200$date = mdy(ASX200$Date)
+#NSEI$date = mdy(NSEI$Date)
+#SSEC$date = mdy(SSEC$Date)
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
 covid2$date = ymd(covid2$date)
 
 #Temporarily changing the date to character as joining cannot be done with date objects
@@ -90,11 +98,19 @@ covid2$date = ymd(covid2$date)
 covid2 <- covid2 %>%
   transform(covid2, date = as.character(date)) %>% 
   select(date, new_cases, new_deaths, location, new_vaccinations, new_tests, population, population_density)
+<<<<<<< HEAD
 #sp500$Date <- as.character(sp500$Date)
 #TOPIX$Date <- as.character(TOPIX$Date)
 ASX200$date <- as.character(ASX200$date)
 #NSEI$Date <- as.character(NSEI$Date)
 #SSEC$Date <- as.character(SSEC$Date)
+=======
+#sp500$date <- as.character(sp500$Date)
+#TOPIX$date <- as.character(TOPIX$Date)
+ASX200$date <- as.character(ASX200$date)
+#NSEI$date <- as.character(NSEI$Date)
+#SSEC$date <- as.character(SSEC$Date)
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
 
 # renaming column so it has same name as the stock market data frames for joining later
 #colnames(covid2)[1] = "Date"
@@ -107,11 +123,19 @@ covid_AUS <- covid2 %>% filter(location == "Australia")
 #covid_CHN <- covid2 %>% filter(location == "China")
 
 # performing joins 
+<<<<<<< HEAD
 #df_1 = inner_join(sp500, covid_US, by = "Date")
 #df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
 df_3 = inner_join(ASX200, covid_AUS, by = "date")
 #df_4 = inner_join(NSEI, covid_IND, by = "Date")
 #df_5 = inner_join(SSEC, covid_CHN, by = "Date")
+=======
+#df_1 = inner_join(sp500, covid_US, by = "date")
+#df_2 = inner_join(TOPIX, covid_JPN, by = "date")
+df_3 = inner_join(ASX200, covid_AUS, by = "date")
+#df_4 = inner_join(NSEI, covid_IND, by = "date")
+#df_5 = inner_join(SSEC, covid_CHN, by = "date")
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
 
 # vertically joined data set (now one column will store all the values of the respective country index)
 # e.g US stores prices relevant to S&P500 and China's prices are relevant to the the SSEC which is based in Shanghai.
@@ -193,6 +217,11 @@ Scatter Plot for price and new_cases
 ```{r}
 df_aus = df_aus[order(as.Date(df_aus$date, format="%d/%m/%Y")),]
 df_aus
+<<<<<<< HEAD
+=======
+df_aus$logPrice = log(df_aus$Price)
+colnames(df_aus)[7] = 'Change'
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
 write.csv(df_aus,"df_aus.csv")
 ```
 
@@ -210,21 +239,26 @@ plot(x, y, main = "Price ~ New Cases",
 abline(lm(y ~ x, data = df_aus), col = "blue")
 ```
 
-Filter the zeros
+## Price ~ new_vaccinations
 ```{r}
+<<<<<<< HEAD
 # df_aus_subset = df_aus %>% select(Price, new_deaths) %>% filter(new_deaths != 0)
 ```
 
 ## New deaths and prices 
 ```{r}
 df_aus_subset = df_aus %>% select(Price, new_deaths, new_vaccinations, new_cases)
+=======
+df_aus_subset = df_aus %>% select(Price, new_vaccinations)
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
 df_aus_subset
 
-M0 = lm(Price ~ new_deaths, data = df_aus_subset) # Null model
-summary(M0)
+M1 = lm(Price ~ poly(new_vaccinations, degree=2), data=df_aus_subset)
+summary(M1)
 ```
 
 ```{r}
+<<<<<<< HEAD
 <<<<<<< HEAD
 ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_point() + ggtitle("Prices of stocks and against new death (Smoothed)") + ylab("New deaths") + xlab("Price")
 =======
@@ -234,17 +268,38 @@ ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_po
 ```
 
 ## Price ~ new_vaccinations
-```{r}
-df_aus_subset = df_aus %>% select(Price, new_vaccinations)
-df_aus_subset
+=======
+ggplot(data = df_aus, mapping = aes(x = new_vaccinations, y = Price)) + geom_point() + ggtitle("Prices of stocks against new vaccinations") + xlab("New vaccinations") + ylab("Price")
+```
 
+## Price ~ New tests
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
+```{r}
+df_aus_subset = df_aus %>% select(Price, new_tests)
+df_aus_subset
+M2 = lm(Price ~ poly(new_tests, degree=2), data=df_aus_subset)
+summary(M2)
+```
+
+<<<<<<< HEAD
 M1 = lm(Price ~ new_vaccinations
         , data = df_aus_subset) # Null model
 summary(M1)
+=======
+```{r}
+ggplot(data = df_aus, mapping = aes(x = new_tests, y = Price)) + geom_point() + ggtitle("Prices of stocks against new tests") + xlab("New tests") + ylab("Price")
+```
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
 
+```{r}
+ggplot(data = df_aus, mapping = aes(x = Price, y = population)) + geom_point() + ggtitle("Prices of stocks against population") + ylab("New tests") + xlab("Price")
+ggplot(data = df_aus, mapping = aes(x = Price, y = population_density)) + geom_point() + ggtitle("Prices of stocks against population density") + ylab("New tests") + xlab("Price")
+ggplot(data = df_aus, mapping = aes(x = date, y = population_density)) + geom_line() + ggtitle("Prices of stocks against population density") + ylab("New tests") + xlab("Price") # bad
+summary(df_aus$Price)
 ```
 
 ```{r}
+<<<<<<< HEAD
 <<<<<<< HEAD
 ggplot(data = df_aus, mapping = aes(x = Price, y = new_vaccinations)) + geom_point() + ggtitle("Prices of stocks and against new vaccinations (Smoothed)") + ylab("New vaccinations") + xlab("Price")
 ```
@@ -287,10 +342,15 @@ summary(df_aus$Price)
 df_aus$Price_mul30 = df_aus$Price*30
 p1 = ggplot(data = df_aus) + geom_line(aes(x=date, y = new_cases), color = "red") + geom_line(aes(x=date, y = new_vaccinations), color = "light green") + geom_line(aes(x=date, y = new_tests), color = "light blue") +
   geom_line(aes(x=date, y = Price_mul30), color = "blue") + theme_bw()
+=======
+df_aus$Price_mul30 = df_aus$Price*30
+p1 = ggplot(data = df_aus) + geom_line(aes(x=date, y = new_cases), color = "red") + geom_line(aes(x=date, y = new_vaccinations), color = "light green") + geom_line(aes(x=date, y = new_tests), color = "light blue")+ theme_bw()
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
 ggplotly(p1)
 ```
 
 ```{r}
+<<<<<<< HEAD
 M = lm(Price ~ new_cases + new_tests + new_vaccinations
         , data = df_aus)
 summary(M)
@@ -308,3 +368,17 @@ autoplot(M2, which = 1:2)
 >>>>>>> 6587750a5b45ad2819cd2b39a578049c1c213b2c
 ```
 
+=======
+M = lm(logPrice ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_aus)
+summary(M)
+autoplot(M, which = 1:2)
+ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = logPrice), color = "light blue") +
+  geom_point(aes(x = new_vaccinations, y = logPrice), color = "light green") +
+  ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
+```
+
+- The behaviour of a dependent variable is explained by a linear, or curvilinear, additive relationship between the dependent variable and a set of k independent variables (xi, i=1 to k).
+- The relationship between the dependent variable and any independent variable is linear or curvilinear.
+- The independent variables do no depend on each other too.
+- The errors are independent, normally distributed with mean zero and a constant variance.
+>>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
