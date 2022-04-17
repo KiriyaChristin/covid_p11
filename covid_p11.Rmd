@@ -52,7 +52,7 @@ covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations,
 covid_clean$new_cases[covid_clean$new_cases < 0] <- 0
 
 covid_AUS <- covid %>% filter(location == "Australia")
-covid_clean_AUS = covid_AUS %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests)
+covid_clean_AUS = covid_AUS %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, perc_tests)
 
 #This code changes the negative case values in the data set to zero
 covid_clean_AUS$new_cases[covid_clean_AUS$new_cases < 0] <- 0
@@ -360,6 +360,23 @@ summary(M_Q2)
 library(ggfortify)
 autoplot(M_Q2, which = 1:2)
 ```
+### Percentages for tests, vaccinations and cases
+```{r}
+covid_clean_AUS <- covid_clean_AUS
+percentage_tests <- (covid_clean_AUS$new_tests/ covid_clean_AUS$total_tests)*100
+vec_percentage_tests <- c(percentage_tests)
+covid_clean_AUS <-cbind(covid_clean_AUS, perc_test = vec_percentage_tests)
+
+covid_clean_AUS <- covid_clean_AUS
+percentage_cases <- (covid_clean_AUS$new_cases/ covid_clean_AUS$total_cases)*100
+vec_percentage_cases <- c(percentage_cases)
+covid_clean_AUS <-cbind(covid_clean_AUS, perc_cases = vec_percentage_cases)
+
+covid_clean_AUS <- covid_clean_AUS
+percentage_vacc <- (covid_clean_AUS$new_vaccinations/ covid_clean_AUS$total_vaccinations)*100
+vec_percentage_vacc <- c(percentage_vacc)
+covid_clean_AUS <-cbind(covid_clean_AUS, perc_vacc = vec_percentage_vacc)
+```
 
 ```{r}
 autoplot(M0, which = 1:2)
@@ -382,3 +399,7 @@ ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = logPrice), color = "li
 - The independent variables do no depend on each other too.
 - The errors are independent, normally distributed with mean zero and a constant variance.
 >>>>>>> 93c3108e5396e326693973906965ec4910ee11a0
+
+
+
+
