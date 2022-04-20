@@ -29,22 +29,69 @@ library(pkr)
 
 Topic: COVID-19 New cases
 visualisation dashboard: Shiny app
+
+# NEW FINAL JOIN CODE BY MAXIM
+
+```{r}
+##########################
+# THIS IS THE FINAL JOIN #
+#######################################################################
+# use covid_joined for your work and filter it to country if you need #
+#######################################################################
+
+covid = read.csv("owid-covid-data.csv")
+sp500 = read.csv("SPY Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for US
+TOPIX = read.csv("TOPIX Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Japan
+ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Australia
+NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for India
+SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
+
+covid2 <- covid
+
+covid2$date = as.character(ymd(covid2$date))
+sp500$Date <- as.character(mdy(sp500$Date))
+TOPIX$Date <- as.character(mdy(TOPIX$Date))
+ASX200$Date <- as.character(mdy(ASX200$Date))
+NSEI$Date <- as.character(mdy(NSEI$Date))
+SSEC$Date <- as.character(mdy(SSEC$Date))
+
+colnames(covid2)[4] = "Date"
+
+covid_US <- covid2 %>% filter(location == "United States")
+covid_AUS <- covid2 %>% filter(location == "Australia")
+covid_IND <- covid2 %>% filter(location == "India")
+covid_JPN <- covid2 %>% filter(location == "Japan")
+covid_CHN <- covid2 %>% filter(location == "China")
+
+df_1 = inner_join(sp500, covid_US, by = "Date")
+df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
+df_3 = inner_join(ASX200, covid_AUS, by = "Date")
+df_4 = inner_join(NSEI, covid_IND, by = "Date")
+df_5 = inner_join(SSEC, covid_CHN, by = "Date")
+
+covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
+
+covid_joined$Date <- ymd(covid_joined$Date)
+covid_joined$Price <- as.numeric(gsub(",","",covid_joined$Price))
+covid_joined$Open <- as.numeric(gsub(",","",covid_joined$Open))
+covid_joined$High <- as.numeric(gsub(",","",covid_joined$High))
+covid_joined$Low <- as.numeric(gsub(",","",covid_joined$Low))
+
+# example analysis for US
+US_data = covid_joined[covid_joined$location == "United States",]
+plot(US_data$Price ~ US_data$Date)
+```
+
+
+# CLEANING AND (OLD JOIN CODE) (not going to use but will leave it because i think some of the code currently depends on it, will fix in the meeting together)
+
 ```{r}
 covid = read.csv("owid-covid-data.csv")
-
-# these are indices for each country (an index is just a collection of stocks)
-# 'FileEncoding' just cleans the column encoding for this case
-
-#sp500 = read.csv("SPY Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for US
-#TOPIX = read.csv("TOPIX Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Japan
 ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Australia
-#NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for India
-#SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
-
-colnames(covid)
 ```
 
 # data clean
+
 ```{r, eval=FALSE}
 #Dropping NA
 covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, weekly_icu_admissions_per_million, weekly_icu_admissions)
@@ -60,7 +107,6 @@ covid_clean_AUS = covid_AUS %>% drop_na(new_cases, new_cases_smoothed, new_vacci
 
 #This code changes the negative case values in the data set to zero
 covid_clean_AUS$new_cases[covid_clean_AUS$new_cases < 0] <- 0
-view(covid_clean_AUS)
 
 #glimpse(covid_clean)
 #covid_clean$date = as.Date(covid_clean$date)
@@ -68,128 +114,38 @@ view(covid_clean_AUS)
 #unique(covid_clean$location)
 ```
 
-# Question 1
-## performing join
-```{r}
-#code for more optimized join (to be pasted later)
-#class(covid_clean$date)
+# the old join
 
-# using a copy just in case
+```{r}
 covid2 <- covid_clean_AUS
 
-#sp500$Date = mdy(sp500$Date)
-#TOPIX$Date = mdy(TOPIX$Date)
 ASX200$date = mdy(ASX200$Date)
-#NSEI$Date = mdy(NSEI$Date)
-#SSEC$Date = mdy(SSEC$Date)
-
-#sp500$date = mdy(sp500$Date)
-#TOPIX$date = mdy(TOPIX$Date)
-ASX200$date = mdy(ASX200$Date)
-#NSEI$date = mdy(NSEI$Date)
-#SSEC$date = mdy(SSEC$Date)
 
 covid2$date = ymd(covid2$date)
 
-#Temporarily changing the date to character as joining cannot be done with date objects
-#Also selecting relevant columns for analysis later
 covid2 <- covid2 %>%
   transform(covid2, date = as.character(date)) %>% 
   select(date, new_cases, new_deaths, location, new_vaccinations, new_tests, population, population_density, total_tests, total_vaccinations, total_cases)
 
-#sp500$Date <- as.character(sp500$Date)
-#TOPIX$Date <- as.character(TOPIX$Date)
 ASX200$date <- as.character(ASX200$date)
-#NSEI$Date <- as.character(NSEI$Date)
-#SSEC$Date <- as.character(SSEC$Date)
 
-#sp500$date <- as.character(sp500$Date)
-#TOPIX$date <- as.character(TOPIX$Date)
 ASX200$date <- as.character(ASX200$date)
-#NSEI$date <- as.character(NSEI$Date)
-#SSEC$date <- as.character(SSEC$Date)
 
-# renaming column so it has same name as the stock market data frames for joining later
-#colnames(covid2)[1] = "Date"
-
-# making data frames for each country we select to perform individual joins on each to their respective stock market index
-#covid_US <- covid2 %>% filter(location == "United States")
 covid_AUS <- covid2 %>% filter(location == "Australia")
-#covid_IND <- covid2 %>% filter(location == "India")
-#covid_JPN <- covid2 %>% filter(location == "Japan")
-#covid_CHN <- covid2 %>% filter(location == "China")
 
-# performing joins 
-
-#df_1 = inner_join(sp500, covid_US, by = "Date")
-#df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
 df_3 = inner_join(ASX200, covid_AUS, by = "date")
-#df_4 = inner_join(NSEI, covid_IND, by = "Date")
-#df_5 = inner_join(SSEC, covid_CHN, by = "Date")
 
-#df_1 = inner_join(sp500, covid_US, by = "date")
-#df_2 = inner_join(TOPIX, covid_JPN, by = "date")
 df_3 = inner_join(ASX200, covid_AUS, by = "date")
-#df_4 = inner_join(NSEI, covid_IND, by = "date")
-#df_5 = inner_join(SSEC, covid_CHN, by = "date")
-
-
-# vertically joined data set (now one column will store all the values of the respective country index)
-# e.g US stores prices relevant to S&P500 and China's prices are relevant to the the SSEC which is based in Shanghai.
-#covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
-
-# Still need transform relevant column to numeric ect...will do a little later 
 
 df_aus <- df_3
 
-#transformation
 df_aus$date = as.Date(df_aus$date)
+
 df_aus$Price = as.numeric(gsub(",","",df_aus$Price))
-
-view(df_aus)
 ```
-
-## Initial analysis for new_cases_smoothed
-
-```{r, eval=FALSE}
-covid_temp <- covid_clean
-covid_temp$month <- strftime(covid_temp$date, "%m")
-covid_temp$year  <- strftime(covid_temp$date, "%Y")
-
-covid_temp_new_case_aggregate <- aggregate(new_cases_smoothed~month+year, 
-                  covid_temp,
-                  FUN = mean)
-covid_temp_new_case_aggregate$month_year <- paste(covid_temp_new_case_aggregate$month, covid_temp_new_case_aggregate$year)
-```
-
-
-```{r, eval=FALSE}
-ggplot(covid_temp_new_case_aggregate, aes(x= new_cases_smoothed, y= month_year)) +
-  geom_bar(stat = 'identity') + ggtitle("Average New Cases (Smoothed) per Month") +
-  ylab("month year") + xlab("average new cases")
-```
-
-- Analysis: From the above bar plot, we set different months of 2021 and 2022 as y-axis and the average smoothed new cases for each month as x-axis. We can easily know that smoothed new cases in most months are less than 30,000 except in Jan, 2022, which is nearly 50,000. So the data of new_cases_smoothed is evenly distributed and has a small standard deviation.
-
-## Initial analysis for new_people_vaccinated_smoothed
-```{r, eval=FALSE}
-covid_temp = covid_clean %>% select(date,new_people_vaccinated_smoothed)
-covid_temp$date <- as.Date(covid_temp$date, format = "%Y-%m-%d")
-covid_temp_new_vaccinated_aggregate = covid_temp %>% mutate(month_year = as.character(format(date, "%m-%Y"))) %>%
-          group_by(month_year) %>%
-  summarise(date=date[1], number = mean(new_people_vaccinated_smoothed))
-covid_temp_new_vaccinated_aggregate  
-```
-
-```{r, warning=FALSE, eval=FALSE}
-ggplot(covid_temp_new_vaccinated_aggregate, aes(x = number, y= month_year)) +
-  geom_bar(stat = 'identity') + ggtitle("Average New People Vaccinated (Smoothed) per Month") +
-  ylab("month year") + xlab("average new people vaccinated")
-```
-
-- Analysis: Most number show above are larger than 100000. Many people get vaccinated in July, August and September in 2021, and less people get vaccinated before and after that period which is reasonable since it takes time to invent and promote new vaccines.
 
 # Q2 a
+
 ```{r}
 df_aus = df_aus[order(as.Date(df_aus$date, format="%d/%m/%Y")),]
 
@@ -199,43 +155,25 @@ colnames(df_aus)[7] = 'Change'
 ```
 
 ## Price ~ new_cases
+
 ```{r, warning=FALSE}
 #glimpse(df_aus)
 df_aus_subset = df_aus %>% select(Price, new_cases)
-view(df_aus_subset)
 
 M0 = lm(Price ~ new_cases, data = df_aus_subset) # Null model
 summary(M0)
 ```
 
-- Analysis(Paul and Christin): We build a linear model here to explore relationship between stock prices and new cases of covid-19. The dependent variable here is stock prices while independent variable is new cases. Although the r-squared value is quite low and Residual standard error is a bit high, which indicates our model is not good, the p-value for new cases is 0.044( < 0.05), so it is a significantly influence Price. The final model we get is $\text{Price} = 1.166e^{-03}\times \text{new_cases} + 7.223e^{03}$.
-
-Scatter Plot for price and new_cases
-
-```{r}
-y <- df_aus$Price
-x <- df_aus$new_cases
-
-plot(x, y, main = "Price ~ New Cases",
-     ylab = "Price", xlab = "new_cases",
-     pch = 19, frame = FALSE)
-# Add regression line
-plot(x, y, main = "Price ~ New Cases",
-     ylab = "Price", xlab = "new_cases",
-     pch = 19, frame = FALSE)
-abline(lm(y ~ x, data = df_aus), col = "blue")
-```
-
 ## Price ~ new_vaccinations
-```{r}
 
+```{r}
 # df_aus_subset = df_aus %>% select(Price, new_deaths) %>% filter(new_deaths != 0)
 ```
 
 ## New deaths and prices 
+
 ```{r}
 df_aus_subset = df_aus %>% select(Price, new_deaths, new_vaccinations, new_cases)
-view(df_aus_subset)
 
 M1 = lm(Price ~ poly(new_vaccinations, degree=2), data=df_aus_subset)
 summary(M1)
@@ -246,14 +184,15 @@ ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_po
 ```
 
 ## Price ~ new_vaccinations
+
 ```{r}
 ggplot(data = df_aus, mapping = aes(x = new_vaccinations, y = Price)) + geom_point() + ggtitle("Prices of stocks against new vaccinations") + xlab("New vaccinations") + ylab("Price")
 ```
 
 ## Price ~ New tests
+
 ```{r}
 df_aus_subset = df_aus %>% select(Price, new_tests)
-view(df_aus_subset)
 M2 = lm(Price ~ poly(new_tests, degree=2), data=df_aus_subset)
 summary(M2)
 ```
@@ -281,9 +220,9 @@ ggplotly(p1)
 
 
 ```{r, eval=FALSE}
-autoplot(M0, which = 1:2)
-autoplot(M1, which = 1:2)
-autoplot(M2, which = 1:2)
+#autoplot(M0, which = 1:2)
+#autoplot(M1, which = 1:2)
+#autoplot(M2, which = 1:2)
 ```
 
 ```{r}
@@ -300,7 +239,9 @@ ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = Price), color = "light
 - The errors are independent, normally distributed with mean zero and a constant variance.
 
 ## Log Price vs grwth rate (give up)
+
 ### Calculate grwth rate
+
 ```{r, eval=FALSE}
 covid_clean_AUS <- df_aus
 percentage_tests <- (covid_clean_AUS$new_tests/ covid_clean_AUS$total_tests)*100
@@ -319,16 +260,17 @@ covid_clean_AUS <-cbind(covid_clean_AUS, perc_new_vacc = vec_percentage_vacc)
 df_aus_Q2 <- covid_clean_AUS
 
 df_aus_Q2$lprice = log(df_aus_Q2$Price)
-view(df_aus_Q2)
 ```
 
 ### Visulization
+
 ```{r, eval=FALSE}
 ggplot(data = df_aus_Q2) + geom_point(aes(x = perc_new_tests, y = lprice), color = "light blue") +
   geom_point(aes(x = perc_new_vacc, y = lprice), color = "light green") +
   geom_point(aes(x = perc_new_cases, y = lprice), color = "red") +
   ggtitle("Prices of stocks againsts growth rate of new cases, new vaccinations and new tests") + xlab("growth rate") + ylab("log(Price)") +theme_classic()
 ```
+
 Very bad plot....
 
 ```{r, eval=FALSE}
@@ -344,7 +286,9 @@ p1 = ggplot(data = df_aus_Q2, aes(x=date)) + geom_line(aes(y = perc_new_cases, c
   scale_color_manual(values = colors) + theme_bw()
 ggplotly(p1)
 ```
+
 ## Slope
+
 ```{r}
 class(df_aus$date)
 Slope(df_aus$date, df_aus$Price)
