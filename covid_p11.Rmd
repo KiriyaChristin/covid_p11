@@ -238,9 +238,9 @@ ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = Price), color = "light
 - The independent variables do no depend on each other too.
 - The errors are independent, normally distributed with mean zero and a constant variance.
 
-## Log Price vs grwth rate (give up) 
+## Log Price vs growth rate (give up) 
 
-### Calculate grwth rate
+### Calculate growth rate
 
 ```{r, eval=FALSE}
 covid_clean_AUS <- df_aus
