@@ -98,7 +98,7 @@ covid_joined <- covid_joined %>%
 install.packages("ggthemes")
 library(ggthemes)
 ggplot(covid_joined, aes(x=Change.., y = location, fill = Year_category)) + geom_boxplot(outlier.colour="black",
-             outlier.size=0.3, notch=TRUE) + theme_clean() + labs(y = "country", x = "Distribution of daily gains/losses (%)") + ggtitle("Distrubtion of daily gains/losses during the years of the pandemic")
+             outlier.size=0.3, notch=TRUE) + theme_clean() + labs(y = "country", x = "Distribution of daily gains/losses (%)") + ggtitle("Distrubtion of daily gains/losses during the years of the pandemic") 
 ```
 
 # evolution of countries through the pandemic
