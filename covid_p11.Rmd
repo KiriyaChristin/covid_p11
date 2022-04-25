@@ -76,10 +76,48 @@ covid_joined$Price <- as.numeric(gsub(",","",covid_joined$Price))
 covid_joined$Open <- as.numeric(gsub(",","",covid_joined$Open))
 covid_joined$High <- as.numeric(gsub(",","",covid_joined$High))
 covid_joined$Low <- as.numeric(gsub(",","",covid_joined$Low))
+covid_joined$Change.. <- as.numeric(gsub("%","",covid_joined$Change..))
 
 # example analysis for US
 US_data = covid_joined[covid_joined$location == "United States",]
 plot(US_data$Price ~ US_data$Date)
+```
+
+# Question 1 - intial data visualisation
+
+# First visualisation - visualising distribution of gains and losses amoung different years (is it ok to use plotly?)
+
+```{r}
+covid_joined <- covid_joined %>% 
+  filter(Date >= "2020-03-11") %>%
+  mutate(Year_category = case_when( 
+    Date >= "2020-03-11" & Date < "2021-01-01" ~ "1st year", 
+    Date >= "2021-01-01" & Date < "2022-01-01" ~ "2nd year", 
+    Date >= "2022-01-01" & Date < "2023-01-01" ~ "3rd year (ongoing)"))
+
+install.packages("ggthemes")
+library(ggthemes)
+ggplot(covid_joined, aes(x=Change.., y = location, fill = Year_category)) + geom_boxplot(outlier.colour="black",
+             outlier.size=0.3, notch=TRUE) + theme_clean() + labs(y = "country", x = "Distribution of daily gains/losses (%)") + ggtitle("Distrubtion of daily gains/losses during the years of the pandemic")
+```
+
+# evolution of countries through the pandemic
+
+```{r}
+head(covid_joined)
+
+ggplot
+
+covid_joined %>% 
+  filter(continent=="Oceania") %>% 
+  ggplot(aes(gdpPercap, lifeExp, size=pop, colour = country)) +
+  geom_point(alpha = 0.5, show.legend = TRUE) +
+  scale_size(range = c(2,12)) +
+  # Here comes the gganimate specific bits
+  labs(title = 'Year: {frame_time}', x = 'GDP per capita in USD', y = 'Life Expectancy') +
+  transition_time(year) +
+  shadow_wake(.3)+
+  ease_aes('linear')
 ```
 
 
@@ -198,7 +236,9 @@ summary(M2)
 ```
 
 ```{r}
-ggplot(data = df_aus, mapping = aes(x = new_tests, y = Price)) + geom_point() + ggtitle("Prices of stocks against new tests") + xlab("New tests") + ylab("Price")
+df_aus_subset$Price <- log(df_aus_subset$Price/lag(df_aus_subset$Price))
+df_aus_subset$new_tests <- log(df_aus_subset$new_test)
+ggplot(data = df_aus_subset, mapping = aes(x = new_tests, y = Price)) + geom_point() + ggtitle("Prices of stocks against new tests") + xlab("New tests") + ylab("Price")
 ```
 
 ```{r, eval=FALSE}
@@ -293,4 +333,81 @@ ggplotly(p1)
 class(df_aus$date)
 Slope(df_aus$date, df_aus$Price)
 ```
+
+# Rolling correlation (part of question 2 done by maxim) BTW THIS CODE IS REALLY MESSY :)
+
+```{r}
+library(tseries)
+library(quantmod)
+library(roll)
+library(plotly)
+
+mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
+myStocks <-lapply(mySymbols, function(x) {getSymbols(x, src = "yahoo", 
+                                                     from = "2020-01-01", 
+                                                     to = "2022-04-04",
+                                                     periodicity = "daily",
+                                                     auto.assign=FALSE)} )
+
+closePrices <- lapply(myStocks, Cl)
+closePrices <- as.data.frame(do.call(merge, closePrices))
+closePrices <- na.omit(log(closePrices/lag(closePrices)))
+closePrices <- rownames_to_column(closePrices, "Date")
+
+date <- closePrices["Date"]
+date
+
+# will need to probably write a function for this later as at the moment i am just hard coding this
+
+corr_AMZN <- as.data.frame(roll_cor(closePrices$AMZN.Close, closePrices$GSPC.Close, width = 150)) %>% cbind(date) %>% na.omit
+corr_NFLX <- as.data.frame(roll_cor(closePrices$NFLX.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_MSFT <- as.data.frame(roll_cor(closePrices$MSFT.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_GOOG <- as.data.frame(roll_cor(closePrices$GOOG.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_NVAX <- as.data.frame(roll_cor(closePrices$NVAX.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_DIS <- as.data.frame(roll_cor(closePrices$DIS.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_WMT <- as.data.frame(roll_cor(closePrices$WMT.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_COST <- as.data.frame(roll_cor(closePrices$COST.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_V <- as.data.frame(roll_cor(closePrices$V.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_FB <- as.data.frame(roll_cor(closePrices$FB.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_AXP <- as.data.frame(roll_cor(closePrices$AXP.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_CMCSA <- as.data.frame(roll_cor(closePrices$CMCSA.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_PFE <- as.data.frame(roll_cor(closePrices$PFE.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_MRNA <- as.data.frame(roll_cor(closePrices$MRNA.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+
+corr_AMZN$symbol <- "AMZN"
+corr_NFLX$symbol <- "NFLX"
+corr_GOOG$symbol <- "GOOG"
+corr_NVAX$symbol <- "NVAX"
+corr_V$symbol <- "VISA"
+corr_FB$symbol <- "FB"
+corr_MSFT$symbol <- "MSFT"
+corr_PFE$symbol <- "PFE"
+corr_MRNA$symbol <- "MRNA"
+
+colnames(corr_AMZN)[1] = "corr"
+colnames(corr_NFLX)[1] = "corr"
+colnames(corr_MSFT)[1] = "corr"
+colnames(corr_GOOG)[1] = "corr"
+colnames(corr_NVAX)[1] = "corr"
+colnames(corr_DIS)[1] = "corr"
+colnames(corr_WMT)[1] = "corr"
+colnames(corr_COST)[1] = "corr"
+colnames(corr_V)[1] = "corr"
+colnames(corr_FB)[1] = "corr"
+colnames(corr_AXP)[1] = "corr"
+colnames(corr_CMCSA)[1] = "corr"
+colnames(corr_PFE)[1] = "corr"
+colnames(corr_MRNA)[1] = "corr"
+
+corr_joined = rbind(corr_AMZN, corr_NFLX, corr_GOOG, corr_NVAX, corr_V, corr_FB, corr_MSFT, corr_PFE, corr_MRNA)
+
+corr_joined$Date <- as.Date(corr_joined$Date)
+corr_joined
+
+library(ggthemes)
+p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + labs(x = "Date", y = "rolling correlation (150D period)") + ggtitle("examining correlation of vaccine macufacturers compared to typical stocks") + theme_clean()
+
+ggplotly(p)
+```
+
 
