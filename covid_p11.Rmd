@@ -278,9 +278,9 @@ ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = Price), color = "light
 - The independent variables do no depend on each other too.
 - The errors are independent, normally distributed with mean zero and a constant variance.
 
-## Log Price vs grwth rate (give up) 
+## Log Price vs growth rate (give up) 
 
-### Calculate grwth rate
+### Calculate growth rate
 
 ```{r, eval=FALSE}
 covid_clean_AUS <- df_aus
@@ -410,4 +410,20 @@ p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + la
 ggplotly(p)
 ```
 
+```{r, eval=FALSE}
+glimpse(df_aus)
+df_aus$LpriceP = log(df_aus$Price/log(df_aus$Price))
+df_aus$Lnew_vaccinationsP = log(df_aus$new_vaccinations/log(df_aus$new_vaccinations))
+df_aus$Lnew_testsP = log(df_aus$new_tests/log(df_aus$new_tests))
+df_aus = drop_na(df_aus, LpriceP, Lnew_vaccinationsP, Lnew_testsP)
+M = lm(LpriceP ~ Lnew_testsP+Lnew_vaccinationsP, data=df_aus)
+summary(M)
+
+M2 = lm(Price ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_aus)
+summary(M2)
+
+ggplot(data = df_aus) + geom_point(aes(x = Lnew_testsP, y = LpriceP), color = "light blue") +
+  geom_point(aes(x = Lnew_vaccinationsP, y = LpriceP), color = "light green") +
+  ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
+```
 
