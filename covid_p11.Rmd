@@ -21,10 +21,18 @@ library(plotly)
 library(caret)
 library(dplyr)
 library(lubridate)
-library("scales")
-library("magrittr")
-library("tidyr")
+library(scales)
+library(magrittr)
+library(tidyr)
 library(pkr)
+library(plotly)
+library(ggthemes)
+library(tseries)
+library(quantmod)
+library(roll)
+library(plotly)
+library(gganimate)
+library(tidyquant)
 ```
 
 Topic: COVID-19 New cases
@@ -46,7 +54,10 @@ ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM')
 NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for India
 SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
 
-covid2 <- covid
+sp <- sp500
+sp$Change.. <- as.numeric(gsub("%","",sp$Change..))
+max = max(sp$Change..)
+max
 
 covid2$date = as.character(ymd(covid2$date))
 sp500$Date <- as.character(mdy(sp500$Date))
@@ -62,6 +73,8 @@ covid_AUS <- covid2 %>% filter(location == "Australia")
 covid_IND <- covid2 %>% filter(location == "India")
 covid_JPN <- covid2 %>% filter(location == "Japan")
 covid_CHN <- covid2 %>% filter(location == "China")
+
+covid_US
 
 df_1 = inner_join(sp500, covid_US, by = "Date")
 df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
@@ -85,7 +98,7 @@ plot(US_data$Price ~ US_data$Date)
 
 # Question 1 - intial data visualisation
 
-# First visualisation - visualising distribution of gains and losses amoung different years (is it ok to use plotly?)
+# First visualisation - visualising distribution of gains and losses amoung different years
 
 ```{r}
 covid_joined <- covid_joined %>% 
@@ -95,22 +108,136 @@ covid_joined <- covid_joined %>%
     Date >= "2021-01-01" & Date < "2022-01-01" ~ "2nd year", 
     Date >= "2022-01-01" & Date < "2023-01-01" ~ "3rd year (ongoing)"))
 
-install.packages("ggthemes")
-library(ggthemes)
-ggplot(covid_joined, aes(x=Change.., y = location, fill = Year_category)) + geom_boxplot(outlier.colour="black",
-             outlier.size=0.3, notch=TRUE) + theme_clean() + labs(y = "country", x = "Distribution of daily gains/losses (%)") + ggtitle("Distrubtion of daily gains/losses during the years of the pandemic") 
+# not using the ggplot but leaving it here in case, instead using the plotly becuase it is interactive
+
+#ggplot(covid_joined, aes(x=Change.., y = location, fill = Year_category)) + geom_boxplot(outlier.colour="black",
+#             outlier.size=0.3, notch=TRUE) + theme_clean() + labs(y = "country", x = "Distribution of daily #gains/losses (%)") + 
+#ggtitle("Distrubtion of daily gains/losses during the years of the pandemic") 
+
+fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_category, type = "box") %>% layout(boxmode = "group", title = 'Distribution of gains and losses over the pandemic',
+         xaxis = list(showgrid = TRUE),
+         yaxis = list(showgrid = TRUE))
 ```
 
-# evolution of countries through the pandemic
+# evolution of countries through the pandemic (not finisihed)
 
 ```{r}
 head(covid_joined)
 
-ggplot
+# Asset tickers
 
+tickers = c("SPY")
+
+price_data <- tq_get(tickers,
+                     from = '2017-12-27',
+                     to = '2021-12-27',
+                     get = 'stock.prices')
+
+price_data
+
+ret_data <- price_data %>%
+  group_by(symbol) %>%
+  tq_transmute(select = adjusted,
+               mutate_fun = periodReturn,
+               period = "daily",
+               col_rename = "ret")
+
+
+port_ret_tidyquant <- ret_data %>%
+  tq_portfolio(assets_col = symbol,
+               returns_col = ret,
+               col_rename = 'port_ret',
+               geometric = FALSE)
+
+
+
+covid_joined$Change.. <- as.numeric(gsub("%","",covid_joined$Change..))
+
+
+
+sp500$cr <- (as.numeric(gsub("%","",sp500$Change..))/100) %>% mutate(cr = cumprod(1 + sp500$cr))
+
+port_cumulative_ret_tidyquant
+
+plot(port_cumulative_ret_tidyquant$port_ret~port_cumulative_ret_tidyquant$date)
+
+port_ret_tidyquant <- ret_data %>%
+  tq_portfolio(assets_col = symbol,
+               returns_col = ret,
+               weights = wts,
+               col_rename = 'port_ret',
+               geometric = FALSE)
+
+port_cumulative_ret_tidyquant <- port_ret_tidyquant %>%
+  mutate(cr = cumprod(1 + port_ret))
+```
+
+# not finished
+
+```{r}
+library(tidyquant)
+
+# Asset tickers
+
+tickers = c('BND', 'VB', 'VEA', 'VOO', 'VWO')
+
+# Asset weights
+
+wts = c(0.1,0.2,0.25,0.25,0.2)
+
+price_data <- tq_get(tickers,
+                     from = '2013-01-01',
+                     to = '2018-03-01',
+                     get = 'stock.prices')
+
+ret_data <- price_data %>%
+  group_by(symbol) %>%
+  tq_transmute(select = adjusted,
+               mutate_fun = periodReturn,
+               period = "daily",
+               col_rename = "ret")
+
+port_ret_tidyquant <- ret_data %>%
+  tq_portfolio(assets_col = symbol,
+               returns_col = ret,
+               weights = wts,
+               col_rename = 'port_ret',
+               geometric = FALSE)
+
+ret_data <- price_data %>%
+  group_by(symbol) %>%
+  tq_transmute(select = adjusted,
+               mutate_fun = periodReturn,
+               period = "daily",
+               col_rename = "ret")
+
+wts_tbl <- tibble(symbol = tickers,
+                  wts = wts)
+ret_data <- left_join(ret_data,wts_tbl, by = 'symbol')
+
+ret_data <- ret_data %>%
+  mutate(wt_return = wts * ret)
+
+port_ret <- ret_data %>%
+  group_by(date) %>%
+  summarise(port_ret = sum(wt_return))
+
+port_cumulative_ret <- port_ret %>%
+  mutate(cr = cumprod(1 + port_ret))
+
+port_cumulative_ret_tidyquant <- port_ret %>%
+  mutate(cr = cumprod(1 + port_ret))
+
+
+port_ret_tidyquant
+port_ret
+
+```
+
+
+```{r}
 covid_joined %>% 
-  filter(continent=="Oceania") %>% 
-  ggplot(aes(gdpPercap, lifeExp, size=pop, colour = country)) +
+  ggplot(aes(total_cases, total_stock, size=pop, colour = country)) +
   geom_point(alpha = 0.5, show.legend = TRUE) +
   scale_size(range = c(2,12)) +
   # Here comes the gganimate specific bits
@@ -337,11 +464,6 @@ Slope(df_aus$date, df_aus$Price)
 # Rolling correlation (part of question 2 done by maxim) BTW THIS CODE IS REALLY MESSY :)
 
 ```{r}
-library(tseries)
-library(quantmod)
-library(roll)
-library(plotly)
-
 mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
 myStocks <-lapply(mySymbols, function(x) {getSymbols(x, src = "yahoo", 
                                                      from = "2020-01-01", 
@@ -404,7 +526,6 @@ corr_joined = rbind(corr_AMZN, corr_NFLX, corr_GOOG, corr_NVAX, corr_V, corr_FB,
 corr_joined$Date <- as.Date(corr_joined$Date)
 corr_joined
 
-library(ggthemes)
 p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + labs(x = "Date", y = "rolling correlation (150D period)") + ggtitle("examining correlation of vaccine macufacturers compared to typical stocks") + theme_clean()
 
 ggplotly(p)
