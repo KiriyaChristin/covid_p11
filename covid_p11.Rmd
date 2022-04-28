@@ -511,4 +511,18 @@ summary(M)
 ## beta function for each country
 ```{r}
 #covid_clean
+df_q2_chn = df_q2 %>% filter(location == "China")
+df_q2_jpn = df_q2 %>% filter(location == "Japan")
+df_q2_usa = df_q2 %>% filter(location == "Uniated States")
+df_q2_ind = df_q2 %>% filter(location=="Indian")
+chn_beta_price_case = beta(df_q2_chn$Lprice, df_q2_chn$Lnew_cases)
+jpn_beta_price_case = beta(df_q2_jpn$Lprice, df_q2_jpn$Lnew_cases)
+usa_beta_price_case = beta(df_q2_usa$Lprice, df_q2_usa$Lnew_cases)
+ind_beta_price_case = beta(df_q2_ind$Lprice, df_q2_ind$Lnew_cases)
+aus_beta_price_case = beta(df_q2_aus$Lprice, df_q2_aus$Lnew_cases)
+plot(jpn_beta_price_case)
+line(chn_beta_price_case, col = "red")
+line(aus_beta_price_case, col = "light blue")
+line(ind_beta_price_case, col = "light green")
+line(usa_beta_price_case, col = "yellow")
 ```
