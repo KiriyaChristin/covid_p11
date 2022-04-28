@@ -504,7 +504,7 @@ ggplot(data = df_aus) + geom_point(aes(x = Lnew_testsP, y = LpriceP), color = "l
 ```
 
 ```{r, eval=FALSE}
-M = lm(LpriceP ~ Lnew_testsP+Lnew_vaccinationsP, data=df_aus)
+M = lm(LpriceP ~ Lnew_testsP+Lnew_vaccinationsP, data=df_q2_aus)
 summary(M)
 ```
 
