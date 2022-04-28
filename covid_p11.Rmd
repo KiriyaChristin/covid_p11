@@ -54,6 +54,8 @@ ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM')
 NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for India
 SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
 
+covid2 <- covid
+
 sp <- sp500
 sp$Change.. <- as.numeric(gsub("%","",sp$Change..))
 max = max(sp$Change..)
@@ -98,7 +100,7 @@ plot(US_data$Price ~ US_data$Date)
 
 # Question 1 - intial data visualisation
 
-# First visualisation - visualising distribution of gains and losses amoung different years
+## First visualisation - visualising distribution of gains and losses amoung different years
 
 ```{r}
 covid_joined <- covid_joined %>% 
@@ -117,11 +119,12 @@ covid_joined <- covid_joined %>%
 fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_category, type = "box") %>% layout(boxmode = "group", title = 'Distribution of gains and losses over the pandemic',
          xaxis = list(showgrid = TRUE),
          yaxis = list(showgrid = TRUE))
+unique(covid_joined$location)
 ```
 
-# evolution of countries through the pandemic (not finisihed)
+## evolution of countries through the pandemic (not finisihed)
 
-```{r}
+```{r, eval=FALSE}
 head(covid_joined)
 
 # Asset tickers
@@ -172,9 +175,9 @@ port_cumulative_ret_tidyquant <- port_ret_tidyquant %>%
   mutate(cr = cumprod(1 + port_ret))
 ```
 
-# not finished
+## not finished
 
-```{r}
+```{r, eval=FALSE}
 library(tidyquant)
 
 # Asset tickers
@@ -235,8 +238,8 @@ port_ret
 ```
 
 
-```{r}
-covid_joined %>% 
+```{r, eval=FALSE}
+covid_joined_vis %>% 
   ggplot(aes(total_cases, total_stock, size=pop, colour = country)) +
   geom_point(alpha = 0.5, show.legend = TRUE) +
   scale_size(range = c(2,12)) +
@@ -248,18 +251,19 @@ covid_joined %>%
 ```
 
 
-# CLEANING AND (OLD JOIN CODE) (not going to use but will leave it because i think some of the code currently depends on it, will fix in the meeting together)
+## CLEANING AND (OLD JOIN CODE) (not going to use but will leave it because i think some of the code currently depends on it, will fix in the meeting together)
 
 ```{r}
 covid = read.csv("owid-covid-data.csv")
 ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Australia
 ```
 
-# data clean
+### Old data clean
 
 ```{r, eval=FALSE}
 #Dropping NA
-covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, weekly_icu_admissions_per_million, weekly_icu_admissions)
+covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, total_tests, total_cases)
+  #drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, weekly_icu_admissions_per_million, weekly_icu_admissions)
 
 #This code changes the negative case values in the data set to zero
 covid_clean$new_cases[covid_clean$new_cases < 0] <- 0
@@ -279,7 +283,7 @@ covid_clean_AUS$new_cases[covid_clean_AUS$new_cases < 0] <- 0
 #unique(covid_clean$location)
 ```
 
-# the old join
+### the old join
 
 ```{r}
 covid2 <- covid_clean_AUS
@@ -309,159 +313,19 @@ df_aus$date = as.Date(df_aus$date)
 df_aus$Price = as.numeric(gsub(",","",df_aus$Price))
 ```
 
-# Q2 a
+# Q2
 
 ```{r}
-df_aus = df_aus[order(as.Date(df_aus$date, format="%d/%m/%Y")),]
+df_q2 = covid_joined
 
-colnames(df_aus)[7] = 'Change'
+colnames(df_q2)[7] = 'Change'
 
-#write.csv(df_aus,"df_aus.csv")
+write.csv(df_q2,"df_q2.csv")
 ```
 
-## Price ~ new_cases
+## Rolling correlation 
 
-```{r, warning=FALSE}
-#glimpse(df_aus)
-df_aus_subset = df_aus %>% select(Price, new_cases)
-
-M0 = lm(Price ~ new_cases, data = df_aus_subset) # Null model
-summary(M0)
-```
-
-## Price ~ new_vaccinations
-
-```{r}
-# df_aus_subset = df_aus %>% select(Price, new_deaths) %>% filter(new_deaths != 0)
-```
-
-## New deaths and prices 
-
-```{r}
-df_aus_subset = df_aus %>% select(Price, new_deaths, new_vaccinations, new_cases)
-
-M1 = lm(Price ~ poly(new_vaccinations, degree=2), data=df_aus_subset)
-summary(M1)
-```
-
-```{r}
-ggplot(data = df_aus_subset, mapping = aes(x = Price, y = new_deaths)) + geom_point() + ggtitle("Prices of stocks and against new death") + ylab("New deaths") + xlab("Price")
-```
-
-## Price ~ new_vaccinations
-
-```{r}
-ggplot(data = df_aus, mapping = aes(x = new_vaccinations, y = Price)) + geom_point() + ggtitle("Prices of stocks against new vaccinations") + xlab("New vaccinations") + ylab("Price")
-```
-
-## Price ~ New tests
-
-```{r}
-df_aus_subset = df_aus %>% select(Price, new_tests)
-M2 = lm(Price ~ poly(new_tests, degree=2), data=df_aus_subset)
-summary(M2)
-```
-
-```{r}
-df_aus_subset$Price <- log(df_aus_subset$Price/lag(df_aus_subset$Price))
-df_aus_subset$new_tests <- log(df_aus_subset$new_test)
-ggplot(data = df_aus_subset, mapping = aes(x = new_tests, y = Price)) + geom_point() + ggtitle("Prices of stocks against new tests") + xlab("New tests") + ylab("Price")
-```
-
-```{r, eval=FALSE}
-ggplot(data = df_aus, mapping = aes(x = Price, y = population)) + geom_point() + ggtitle("Prices of stocks against population") + ylab("New tests") + xlab("Price")
-ggplot(data = df_aus, mapping = aes(x = Price, y = population_density)) + geom_point() + ggtitle("Prices of stocks against population density") + ylab("New tests") + xlab("Price")
-ggplot(data = df_aus, mapping = aes(x = date, y = population_density)) + geom_line() + ggtitle("Prices of stocks against population density") + ylab("New tests") + xlab("Price") # bad
-summary(df_aus$Price)
-```
-
-```{r}
-df_aus$Price_mul30 = df_aus$Price*30
-p1 = ggplot(data = df_aus) + geom_line(aes(x=date, y = new_cases), color = "red") + geom_line(aes(x=date, y = new_vaccinations), color = "light green") + geom_line(aes(x=date, y = new_tests), color = "light blue") +
-  geom_line(aes(x=date, y = Price_mul30), color = "blue") + theme_bw()
-
-df_aus$Price_mul30 = df_aus$Price*30
-p1 = ggplot(data = df_aus) + geom_line(aes(x=date, y = new_cases), color = "red") + geom_line(aes(x=date, y = new_vaccinations), color = "light green") + geom_line(aes(x=date, y = new_tests), color = "light blue")+ theme_bw()
-ggplotly(p1)
-```
-
-
-```{r, eval=FALSE}
-#autoplot(M0, which = 1:2)
-#autoplot(M1, which = 1:2)
-#autoplot(M2, which = 1:2)
-```
-
-```{r}
-M = lm(Price ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_aus)
-summary(M)
-ggplot(data = df_aus) + geom_point(aes(x = new_tests, y = Price), color = "light blue") +
-  geom_point(aes(x = new_vaccinations, y = Price), color = "light green") +
-  ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
-```
-
-- The behaviour of a dependent variable is explained by a linear, or curvilinear, additive relationship between the dependent variable and a set of k independent variables (xi, i=1 to k).
-- The relationship between the dependent variable and any independent variable is linear or curvilinear.
-- The independent variables do no depend on each other too.
-- The errors are independent, normally distributed with mean zero and a constant variance.
-
-## Log Price vs growth rate (give up) 
-
-### Calculate growth rate
-
-```{r, eval=FALSE}
-covid_clean_AUS <- df_aus
-percentage_tests <- (covid_clean_AUS$new_tests/ covid_clean_AUS$total_tests)*100
-vec_percentage_tests <- c(percentage_tests)
-covid_clean_AUS <-cbind(covid_clean_AUS, perc_new_tests = vec_percentage_tests)
-
-covid_clean_AUS <- covid_clean_AUS
-percentage_cases <- (covid_clean_AUS$new_cases/ covid_clean_AUS$total_cases)*100
-vec_percentage_cases <- c(percentage_cases)
-covid_clean_AUS <-cbind(covid_clean_AUS, perc_new_cases = vec_percentage_cases)
-
-covid_clean_AUS <- covid_clean_AUS
-percentage_vacc <- (covid_clean_AUS$new_vaccinations/ covid_clean_AUS$total_vaccinations)*100
-vec_percentage_vacc <- c(percentage_vacc)
-covid_clean_AUS <-cbind(covid_clean_AUS, perc_new_vacc = vec_percentage_vacc)
-df_aus_Q2 <- covid_clean_AUS
-
-df_aus_Q2$lprice = log(df_aus_Q2$Price)
-```
-
-### Visulization
-
-```{r, eval=FALSE}
-ggplot(data = df_aus_Q2) + geom_point(aes(x = perc_new_tests, y = lprice), color = "light blue") +
-  geom_point(aes(x = perc_new_vacc, y = lprice), color = "light green") +
-  geom_point(aes(x = perc_new_cases, y = lprice), color = "red") +
-  ggtitle("Prices of stocks againsts growth rate of new cases, new vaccinations and new tests") + xlab("growth rate") + ylab("log(Price)") +theme_classic()
-```
-
-Very bad plot....
-
-```{r, eval=FALSE}
-df_aus_Q2 = filter(df_aus_Q2, date >= "2021-03-05")
-
-colors <- c("new vaccinations" = "light green", "new cases" = "red", "new tests" = "orange", "log price" = "black")
-p1 = ggplot(data = df_aus_Q2, aes(x=date)) + geom_line(aes(y = perc_new_cases, color = "new cases")) + geom_line(aes(y = perc_new_vacc, color = "new vaccinations")) +
-  geom_line(aes(y = lprice, color = "log price")) + 
-  geom_line(aes(y = perc_new_tests, color = "new tests")) +
-  labs(x = "Date",
-         y = "(%)",
-         color = "Legend") +
-  scale_color_manual(values = colors) + theme_bw()
-ggplotly(p1)
-```
-
-## Slope
-
-```{r}
-class(df_aus$date)
-Slope(df_aus$date, df_aus$Price)
-```
-
-# Rolling correlation (part of question 2 done by maxim) BTW THIS CODE IS REALLY MESSY :)
+- (part of question 2 done by maxim) BTW THIS CODE IS REALLY MESSY :)
 
 ```{r}
 mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
@@ -531,20 +395,120 @@ p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + la
 ggplotly(p)
 ```
 
-```{r, eval=FALSE}
+## Visual for variables and price
+### Visual of vac,tests,cases
+```{r}
+colnames(df_q2)
+p1 = ggplot(data = df_q2, aes(x = Date)) + geom_line(aes(y=new_cases), color = 'red') +
+  geom_line(aes(y=new_vaccinations), color = 'light green') +
+  geom_line(aes(y=new_tests), color = 'light blue') +
+  ggtitle("vacc tests and new cases and date") + xlab("date") +
+  ylab("values")+
+  theme_bw()
+ggplotly(p1)
+```
+
+### scatter plot
+```{r, warning=FALSE}
+df_q2_scatter_plot_price_var_fac = function(plot_df, xvar, xvar_lab, title) {
+  p1 = ggplot(data = plot_df, aes(x = xvar, group=location, color = location)) +
+    geom_point(aes(y=Price)) +
+    facet_grid(location ~ .) + 
+    ggtitle(title) + xlab(xvar_lab) + 
+    ylab("Price") +
+    theme_bw()
+  p1
+}
+
+df_q2_scatter_plot_price_var = function(plot_df, xvar, xvar_lab, title) {
+  p1 = ggplot(data = plot_df, aes(x = xvar)) +
+    geom_point(aes(y=Price)) +
+    ggtitle(title) + xlab(xvar_lab) + 
+    ylab("Price") +
+    theme_bw()
+  p1
+}
+
+df_q2_scatter_plot_Lprice_var_fac = function(plot_df, xvar, xvar_lab, title) {
+  p1 = ggplot(data = plot_df, aes(x = xvar, group=location, color = location)) +
+    geom_point(aes(y=Price)) +
+    facet_grid(location ~ .) + 
+    ggtitle(title) + xlab(xvar_lab) + 
+    ylab("Price") +
+    theme_bw()
+  p1
+}
+
+df_q2_scatter_plot_Lprice_var = function(plot_df, xvar, xvar_lab, title) {
+  p1 = ggplot(data = plot_df, aes(x = xvar)) +
+    geom_point(aes(y=Lprice)) +
+    ggtitle(title) + xlab(xvar_lab) + 
+    ylab("Price") +
+    theme_bw()
+  p1
+}
+
+df_q2$Lprice = log(df_q2$Price/log(df_q2$Price))
+df_q2$Lnew_vaccinations = log(df_q2$new_vaccinations/log(df_q2$new_vaccinations))
+df_q2$Lnew_tests = log(df_q2$new_tests/log(df_q2$new_tests))
+df_q2$Lnew_cases = log(df_q2$new_cases/log(df_q2$new_cases))
+
+df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_tests, "new_tests", "log(Price~Log(new_tests")
+df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_vaccinations, "new_vaccinations", "log(Price~Log(new_vaccinations")
+df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_cases, "new_vaccinations", "log(Price~Log(new_cases")
+```
+
+
+## Take Australia as example
+```{r, warning=FALSE}
+df_q2_aus = df_q2 %>% filter(location == "Australia")
+
+df_q2_scatter_plot_Lprice_var(df_q2_aus, df_q2_aus$Lnew_tests, "new_tests", "Australia Log(Price~Log(new_tests")
+df_q2_scatter_plot_Lprice_var(df_q2_aus, df_q2_aus$Lnew_vaccinations, "new_vaccinations", "Australia Log(Price~Log(new_vaccinations")
+df_q2_scatter_plot_Lprice_var(df_q2_aus, df_q2_aus$Lnew_cases, "new_cases", "Australia Log(Price~Log(new_cases")
+
+df_q2_aus = drop_na(df_q2_aus, Lprice, Lnew_tests, Lnew_vaccinations)
+#M2 = lm(Lprice ~ Lnew_tests + Lnew_vaccinations, data=df_q2_aus)
+#summary(M2)
+
+ggplot(data = df_q2_aus) + geom_point(aes(x = new_tests, y = Lprice), color = "light blue") +
+  geom_point(aes(x = new_vaccinations, y = Lprice), color = "light green") +
+  ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
+
+M = lm(Lprice ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_q2_aus)
+summary(M)
+```
+
+- The behaviour of a dependent variable is explained by a linear, or curvilinear, additive relationship between the dependent variable and a set of k independent variables (xi, i=1 to k).
+- The relationship between the dependent variable and any independent variable is linear or curvilinear.
+- The independent variables do no depend on each other too.
+- The errors are independent, normally distributed with mean zero and a constant variance.
+
+## log and slope correlation
+- Jasmie and Christin
+```{r}
 glimpse(df_aus)
 df_aus$LpriceP = log(df_aus$Price/log(df_aus$Price))
 df_aus$Lnew_vaccinationsP = log(df_aus$new_vaccinations/log(df_aus$new_vaccinations))
 df_aus$Lnew_testsP = log(df_aus$new_tests/log(df_aus$new_tests))
-df_aus = drop_na(df_aus, LpriceP, Lnew_vaccinationsP, Lnew_testsP)
-M = lm(LpriceP ~ Lnew_testsP+Lnew_vaccinationsP, data=df_aus)
-summary(M)
+df_aus$Lnew_casesP = log(df_aus$new_cases/log(df_aus$new_cases))
+df_aus = drop_na(df_aus, LpriceP, Lnew_vaccinationsP, Lnew_testsP, Lnew_casesP)
 
-M2 = lm(Price ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_aus)
-summary(M2)
+#M2 = lm(Price ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_aus)
+#summary(M2)
 
 ggplot(data = df_aus) + geom_point(aes(x = Lnew_testsP, y = LpriceP), color = "light blue") +
   geom_point(aes(x = Lnew_vaccinationsP, y = LpriceP), color = "light green") +
+  geom_point(aes(x = Lnew_casesP, y = LpriceP), color = "red") +
   ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
 ```
 
+```{r, eval=FALSE}
+M = lm(LpriceP ~ Lnew_testsP+Lnew_vaccinationsP, data=df_aus)
+summary(M)
+```
+
+## beta function for each country
+```{r}
+#covid_clean
+```
