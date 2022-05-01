@@ -100,7 +100,9 @@ plot(US_data$Price ~ US_data$Date)
 
 # Question 1 - intial data visualisation
 
-## First visualisation - visualising distribution of gains and losses amoung different years
+## First visualisation 
+
+- visualising distribution of gains and losses amoung different years
 
 ```{r}
 covid_joined <- covid_joined %>% 
@@ -251,7 +253,9 @@ covid_joined_vis %>%
 ```
 
 
-## CLEANING AND (OLD JOIN CODE) (not going to use but will leave it because i think some of the code currently depends on it, will fix in the meeting together)
+## CLEANING AND (OLD JOIN CODE) 
+
+- (not going to use but will leave it because i think some of the code currently depends on it, will fix in the meeting together)
 
 ```{r}
 covid = read.csv("owid-covid-data.csv")
@@ -327,7 +331,7 @@ write.csv(df_q2,"df_q2.csv")
 
 - (part of question 2 done by maxim) BTW THIS CODE IS REALLY MESSY :)
 
-```{r}
+```{r, eval=FALSE}
 mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
 myStocks <-lapply(mySymbols, function(x) {getSymbols(x, src = "yahoo", 
                                                      from = "2020-01-01", 
@@ -398,17 +402,18 @@ ggplotly(p)
 ## Visual for variables and price
 ### Visual of vac,tests,cases
 ```{r}
-colnames(df_q2)
-p1 = ggplot(data = df_q2, aes(x = Date)) + geom_line(aes(y=new_cases), color = 'red') +
-  geom_line(aes(y=new_vaccinations), color = 'light green') +
-  geom_line(aes(y=new_tests), color = 'light blue') +
+#colnames(df_q2)
+df_q2_date = df_q2 %>% drop_na(new_cases, new_tests, new_vaccinations) %>% group_by(Date) %>% summarize(avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
+p1 = ggplot(data = df_q2_date, aes(x = Date)) + geom_line(aes(y=avg_new_cases), color = 'red') +
+  geom_line(aes(y=avg_new_vac), color = 'light green') +
+  geom_line(aes(y=avg_new_tests), color = 'light blue') +
   ggtitle("vacc tests and new cases and date") + xlab("date") +
   ylab("values")+
   theme_bw()
 ggplotly(p1)
 ```
 
-### scatter plot
+### scatter plot for each country (log(new vac, tests, price, cases))
 ```{r, warning=FALSE}
 df_q2_scatter_plot_price_var_fac = function(plot_df, xvar, xvar_lab, title) {
   p1 = ggplot(data = plot_df, aes(x = xvar, group=location, color = location)) +
@@ -484,7 +489,7 @@ summary(M)
 - The independent variables do no depend on each other too.
 - The errors are independent, normally distributed with mean zero and a constant variance.
 
-## log and slope correlation
+## Australia polynomial regression
 - Jasmie and Christin
 ```{r}
 glimpse(df_aus)
