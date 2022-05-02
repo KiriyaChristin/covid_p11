@@ -262,61 +262,6 @@ covid = read.csv("owid-covid-data.csv")
 ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # This is for Australia
 ```
 
-### Old data clean
-
-```{r, eval=FALSE}
-#Dropping NA
-covid_clean = covid %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, total_tests, total_cases)
-  #drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, weekly_icu_admissions_per_million, weekly_icu_admissions)
-
-#This code changes the negative case values in the data set to zero
-covid_clean$new_cases[covid_clean$new_cases < 0] <- 0
-```
-
-```{r}
-#Dropping NA
-covid_AUS <- covid %>% filter(location == "Australia")
-covid_clean_AUS = covid_AUS %>% drop_na(new_cases, new_cases_smoothed, new_vaccinations, new_vaccinations_smoothed, new_vaccinations_smoothed_per_million, population, population_density, median_age, extreme_poverty, total_vaccinations, hospital_beds_per_thousand, human_development_index, new_deaths, new_tests, total_tests, total_cases)
-
-#This code changes the negative case values in the data set to zero
-covid_clean_AUS$new_cases[covid_clean_AUS$new_cases < 0] <- 0
-
-#glimpse(covid_clean)
-#covid_clean$date = as.Date(covid_clean$date)
-#max(covid_clean$date)
-#unique(covid_clean$location)
-```
-
-### the old join
-
-```{r}
-covid2 <- covid_clean_AUS
-
-ASX200$date = mdy(ASX200$Date)
-
-covid2$date = ymd(covid2$date)
-
-covid2 <- covid2 %>%
-  transform(covid2, date = as.character(date)) %>% 
-  select(date, new_cases, new_deaths, location, new_vaccinations, new_tests, population, population_density, total_tests, total_vaccinations, total_cases)
-
-ASX200$date <- as.character(ASX200$date)
-
-ASX200$date <- as.character(ASX200$date)
-
-covid_AUS <- covid2 %>% filter(location == "Australia")
-
-df_3 = inner_join(ASX200, covid_AUS, by = "date")
-
-df_3 = inner_join(ASX200, covid_AUS, by = "date")
-
-df_aus <- df_3
-
-df_aus$date = as.Date(df_aus$date)
-
-df_aus$Price = as.numeric(gsub(",","",df_aus$Price))
-```
-
 # Q2
 
 ```{r}
@@ -399,136 +344,65 @@ p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + la
 ggplotly(p)
 ```
 
-## Visual for variables and price
-### Visual of vac,tests,cases
+## Visualization for Price and intertested variables
+```{r, warning=FALSE}
+df_q2_scatter_plot_Lprice_var_fac = function(plot_df, xvar, xvar_lab, title) {
+  p1 = ggplot(data = plot_df, aes(x = xvar, group=location, color = location)) +
+    geom_point(aes(y=Lprice)) +
+    facet_grid(location ~ .) + 
+    ggtitle(title) + xlab(xvar_lab) + 
+    ylab("Price") +
+    theme_bw()
+  p1
+}
+
+df_q2$Lprice = log(df_q2$Price/lag(df_q2$Price))
+df_q2$Lnew_vaccinations = log(df_q2$new_vaccinations/lag(df_q2$new_vaccinations))
+df_q2$Lnew_tests = log(df_q2$new_tests/lag(df_q2$new_tests))
+df_q2$Lnew_cases = log(df_q2$new_cases/lag(df_q2$new_cases))
+
+df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_tests, "new_tests", "log return(Price)~Log return(new_tests)")
+df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_vaccinations, "new_vaccinations", "Log return(Price)~Log return(new_vaccinations)")
+df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_cases, "new_vaccinations", "Log return(Price)~Log return(new_cases)")
+```
+
+### Visualization of new vacination, tests, cases over time
 ```{r}
 #colnames(df_q2)
-df_q2_date = df_q2 %>% drop_na(new_cases, new_tests, new_vaccinations) %>% group_by(Date) %>% summarize(avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
+df_q2_date = df_q2 %>% drop_na(new_cases, new_tests, new_vaccinations) %>% group_by(Date) %>% summarize(avg_price = mean(Price), avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
 p1 = ggplot(data = df_q2_date, aes(x = Date)) + geom_line(aes(y=avg_new_cases), color = 'red') +
   geom_line(aes(y=avg_new_vac), color = 'light green') +
   geom_line(aes(y=avg_new_tests), color = 'light blue') +
-  ggtitle("vacc tests and new cases and date") + xlab("date") +
+  ggtitle("covid data plot") + xlab("date") +
   ylab("values")+
   theme_bw()
 ggplotly(p1)
 ```
 
-### scatter plot for each country (log(new vac, tests, price, cases))
-```{r, warning=FALSE}
-df_q2_scatter_plot_price_var_fac = function(plot_df, xvar, xvar_lab, title) {
-  p1 = ggplot(data = plot_df, aes(x = xvar, group=location, color = location)) +
-    geom_point(aes(y=Price)) +
-    facet_grid(location ~ .) + 
-    ggtitle(title) + xlab(xvar_lab) + 
-    ylab("Price") +
-    theme_bw()
-  p1
-}
-
-df_q2_scatter_plot_price_var = function(plot_df, xvar, xvar_lab, title) {
-  p1 = ggplot(data = plot_df, aes(x = xvar)) +
-    geom_point(aes(y=Price)) +
-    ggtitle(title) + xlab(xvar_lab) + 
-    ylab("Price") +
-    theme_bw()
-  p1
-}
-
-df_q2_scatter_plot_Lprice_var_fac = function(plot_df, xvar, xvar_lab, title) {
-  p1 = ggplot(data = plot_df, aes(x = xvar, group=location, color = location)) +
-    geom_point(aes(y=Price)) +
-    facet_grid(location ~ .) + 
-    ggtitle(title) + xlab(xvar_lab) + 
-    ylab("Price") +
-    theme_bw()
-  p1
-}
-
-df_q2_scatter_plot_Lprice_var = function(plot_df, xvar, xvar_lab, title) {
-  p1 = ggplot(data = plot_df, aes(x = xvar)) +
-    geom_point(aes(y=Lprice)) +
-    ggtitle(title) + xlab(xvar_lab) + 
-    ylab("Price") +
-    theme_bw()
-  p1
-}
-
-df_q2$Lprice = log(df_q2$Price/log(df_q2$Price))
-df_q2$Lnew_vaccinations = log(df_q2$new_vaccinations/log(df_q2$new_vaccinations))
-df_q2$Lnew_tests = log(df_q2$new_tests/log(df_q2$new_tests))
-df_q2$Lnew_cases = log(df_q2$new_cases/log(df_q2$new_cases))
-
-df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_tests, "new_tests", "log(Price~Log(new_tests")
-df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_vaccinations, "new_vaccinations", "log(Price~Log(new_vaccinations")
-df_q2_scatter_plot_Lprice_var_fac(df_q2, df_q2$Lnew_cases, "new_vaccinations", "log(Price~Log(new_cases")
-```
-
-
-## Take Australia as example
-```{r, warning=FALSE}
-df_q2_aus = df_q2 %>% filter(location == "Australia")
-
-df_q2_scatter_plot_Lprice_var(df_q2_aus, df_q2_aus$Lnew_tests, "new_tests", "Australia Log(Price~Log(new_tests")
-df_q2_scatter_plot_Lprice_var(df_q2_aus, df_q2_aus$Lnew_vaccinations, "new_vaccinations", "Australia Log(Price~Log(new_vaccinations")
-df_q2_scatter_plot_Lprice_var(df_q2_aus, df_q2_aus$Lnew_cases, "new_cases", "Australia Log(Price~Log(new_cases")
-
-df_q2_aus = drop_na(df_q2_aus, Lprice, Lnew_tests, Lnew_vaccinations)
-#M2 = lm(Lprice ~ Lnew_tests + Lnew_vaccinations, data=df_q2_aus)
-#summary(M2)
-
-ggplot(data = df_q2_aus) + geom_point(aes(x = new_tests, y = Lprice), color = "light blue") +
-  geom_point(aes(x = new_vaccinations, y = Lprice), color = "light green") +
-  ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
-
-M = lm(Lprice ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_q2_aus)
-summary(M)
-```
-
-- The behaviour of a dependent variable is explained by a linear, or curvilinear, additive relationship between the dependent variable and a set of k independent variables (xi, i=1 to k).
-- The relationship between the dependent variable and any independent variable is linear or curvilinear.
-- The independent variables do no depend on each other too.
-- The errors are independent, normally distributed with mean zero and a constant variance.
-
-## Australia polynomial regression
-- Jasmie and Christin
+### Correlation Matrix
 ```{r}
-glimpse(df_aus)
-df_aus$LpriceP = log(df_aus$Price/log(df_aus$Price))
-df_aus$Lnew_vaccinationsP = log(df_aus$new_vaccinations/log(df_aus$new_vaccinations))
-df_aus$Lnew_testsP = log(df_aus$new_tests/log(df_aus$new_tests))
-df_aus$Lnew_casesP = log(df_aus$new_cases/log(df_aus$new_cases))
-df_aus = drop_na(df_aus, LpriceP, Lnew_vaccinationsP, Lnew_testsP, Lnew_casesP)
-
-#M2 = lm(Price ~ polym(new_tests, new_vaccinations, degree=2, raw=TRUE), data=df_aus)
-#summary(M2)
-
-ggplot(data = df_aus) + geom_point(aes(x = Lnew_testsP, y = LpriceP), color = "light blue") +
-  geom_point(aes(x = Lnew_vaccinationsP, y = LpriceP), color = "light green") +
-  geom_point(aes(x = Lnew_casesP, y = LpriceP), color = "red") +
-  ggtitle("Prices of stocks against new tests and new_vaccinations") + ylab("Price") +theme_classic()
+df_q2_cor = df_q2 %>% drop_na(new_vaccinations, new_tests, new_cases, Price) %>% select(new_vaccinations, new_tests, new_cases, Price)
+cor(df_q2_cor)
+qtlcharts::iplotCorr(df_q2_cor)
 ```
 
-```{r, eval=FALSE}
-M = lm(LpriceP ~ Lnew_testsP+Lnew_vaccinationsP, data=df_q2_aus)
-summary(M)
-```
 
 ## beta function for each country
-```{r}
+```{r, eval=FALSE}
 #covid_clean
-df_q2_chn = df_q2 %>% filter(location == "China")
-df_q2_jpn = df_q2 %>% filter(location == "Japan")
-df_q2_usa = df_q2 %>% filter(location == "United States")
-df_q2_ind = df_q2 %>% filter(location == "India")
-chn_beta_price_case = beta(df_q2_chn$Lprice, df_q2_chn$Lnew_cases)
-jpn_beta_price_case = beta(df_q2_jpn$Lprice, df_q2_jpn$Lnew_cases)
-usa_beta_price_case = beta(df_q2_usa$Lprice, df_q2_usa$Lnew_cases)
-ind_beta_price_case = beta(df_q2_ind$Lprice, df_q2_ind$Lnew_cases)
-aus_beta_price_case = beta(df_q2_aus$Lprice, df_q2_aus$Lnew_cases)
+df_q2_beta = df_q2 %>% drop_na(Lprice2, Lnew_cases2)
+df_q2_chn = df_q2_beta %>% filter(location == "China")
+df_q2_jpn = df_q2_beta %>% filter(location == "Japan")
+df_q2_usa = df_q2_beta %>% filter(location == "United States")
+df_q2_ind = df_q2_beta %>% filter(location == "India")
+chn_beta_price_case = beta(df_q2_chn$Lprice2, df_q2_chn$Lnew_cases2)
+jpn_beta_price_case = beta(df_q2_jpn$Lprice2, df_q2_jpn$Lnew_cases2)
+usa_beta_price_case = beta(df_q2_usa$Lprice2, df_q2_usa$Lnew_cases2)
+ind_beta_price_case = beta(df_q2_ind$Lprice2, df_q2_ind$Lnew_cases2)
+aus_beta_price_case = beta(df_q2_aus$Lprice2, df_q2_aus$Lnew_cases2)
 plot(jpn_beta_price_case,type="l")
 plot(chn_beta_price_case,type="l", col = "red")
 plot(aus_beta_price_case,type="l", col = "light blue")
 plot(ind_beta_price_case,type="l", col = "light green")
 plot(usa_beta_price_case,type="l", col = "yellow")
-```
 ```
