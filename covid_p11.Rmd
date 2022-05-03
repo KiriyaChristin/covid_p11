@@ -406,3 +406,17 @@ plot(aus_beta_price_case,type="l", col = "light blue")
 plot(ind_beta_price_case,type="l", col = "light green")
 plot(usa_beta_price_case,type="l", col = "yellow")
 ```
+
+
+# Question3 
+
+## Building the model
+```{r}
+glm1= glm(Price ~ new_vaccinations + new_tests + new_cases,data = df_q2_cor)
+summary(glm1)
+```
+
+## Assumption checking
+```{r}
+plot(glm1, which = 1:2)
+```
