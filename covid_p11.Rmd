@@ -33,6 +33,8 @@ library(roll)
 library(plotly)
 library(gganimate)
 library(tidyquant)
+library(caret)
+library(klaR)
 ```
 
 Topic: COVID-19 New cases
@@ -424,5 +426,25 @@ plot(glm1, which = 1:2)
 mean(df_q2_cor$Price)
 median(df_q2_cor$Price)
 quantile(df_q2_cor$Price, 0.25)
+```
+```{r}
+#df_q2_cor$level <- ifelse(df_q2_cor$Price < 1978.28, "low", "high")
+
+df_q2_cor <- df_q2_cor %>% mutate(level = case_when((df_q2_cor$Price <= 1978.28) ~ "Low",
+                                                    ((df_q2_cor$Price > 1978.28) & (df_q2_cor$Price < 6511.446)) ~ "Medium",
+                                         
+                                                    (df_q2_cor$Price > 6511.446) ~ "High"
+))
+df_q2_cor
+```
+
+
+
+```{r}
+train_control <- trainControl(method = "repeatedcv", number = 5, repeats = 5)
+#train the model
+model1 <- train(df_q2_cor$level~., data = df_q2_cor, trControl = train_control, method = "nb")
+#summarize results
+model1
 ```
 
