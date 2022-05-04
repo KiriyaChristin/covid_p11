@@ -441,10 +441,21 @@ df_q2_cor
 
 
 ```{r}
-train_control <- trainControl(method = "repeatedcv", number = 5, repeats = 5)
-#train the model
-model1 <- train(df_q2_cor$level~., data = df_q2_cor, trControl = train_control, method = "nb")
-#summarize results
-model1
+set.seed(1)
+split = 0.8
+## 80% 20% train/test
+trainIndex <- createDataPartition(df_q2_cor$level, p = split, list = FALSE)
+data_train <- df_q2_cor[trainIndex, ]
+data_test <- df_q2_cor[-trainIndex, ]
+##naive bayes model
+model = train(df_q2_cor$level ~ df_q2_cor$new_vaccinations+df_q2_cor$new_tests+df_q2_cor$new_cases+df_q2_cor$Price, data = data_train)
+```
+
+
+```{r}
+# define training control
+train_control <- trainControl(method="cv", number=10)
+# train the model
+model <- train(df_q2_cor$level~., data=df_q2_cor, trControl=train_control, method="nb")
 ```
 
