@@ -459,3 +459,33 @@ train_control <- trainControl(method="cv", number=10)
 model <- train(df_q2_cor$level~., data=df_q2_cor, trControl=train_control, method="nb")
 ```
 
+#Marin
+
+```{r}
+table(df_q2_cor$level)
+```
+
+```{r}
+df_q2_cor$level <- as.factor(df_q2_cor$level)
+df_q2_cor
+```
+
+```{r,warning=FALSE}
+# load the library
+library(caret)
+# define training control
+train_control <- trainControl(method="boot", number=100)
+# train the model
+model <- train(level~., data=df_q2_cor, trControl=train_control, method="nb")
+# summarize results
+print(model)
+```
+
+```{r,warning=FALSE}
+# define training control
+train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(level~., data=df_q2_cor, trControl=train_control, method="nb")
+# summarize results
+print(model)
+```
