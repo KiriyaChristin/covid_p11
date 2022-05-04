@@ -420,3 +420,9 @@ summary(glm1)
 ```{r}
 plot(glm1, which = 1:2)
 ```
+```{r}
+mean(df_q2_cor$Price)
+median(df_q2_cor$Price)
+quantile(df_q2_cor$Price, 0.25)
+```
+
