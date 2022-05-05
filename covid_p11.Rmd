@@ -488,11 +488,12 @@ print(model_knn)
 ```
 
 ```{r}
-par(mfrow=c(2,2))
+par(mfrow=c(3,1))
 boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
-boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizontal = TRUE)
+#boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
-boxplot(model_rda$results$Accuracy, ylab = "RDA",xlab = "Accuracy", horizontal = TRUE)
+## redundancy analysis
+boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
 ```
 ```{r}
 model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
