@@ -480,7 +480,7 @@ print(model)
 train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
 # train the model
 model_knn <- train(level~., data=df_q2_cor, trControl=train_control, method="knn")
-model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
+#model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
 model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
 model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda")
 # summarize results
