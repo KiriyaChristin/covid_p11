@@ -482,15 +482,17 @@ train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
 model_knn <- train(level~., data=df_q2_cor, trControl=train_control, method="knn")
 model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
 model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
+model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda")
 # summarize results
 print(model_knn)
 ```
 
 ```{r}
-par(mfrow=c(3,1))
+par(mfrow=c(2,2))
 boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_rda$results$Accuracy, ylab = "RDA",xlab = "Accuracy", horizontal = TRUE)
 ```
 ```{r}
 model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
@@ -503,5 +505,11 @@ boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizont
 model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
 model_pls
 boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
+```
+
+```{r}
+model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda")
+model_rda
+boxplot(model_rda$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
 ```
 
