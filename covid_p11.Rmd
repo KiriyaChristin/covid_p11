@@ -480,11 +480,28 @@ print(model)
 train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
 # train the model
 model_knn <- train(level~., data=df_q2_cor, trControl=train_control, method="knn")
+model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
+model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
 # summarize results
 print(model_knn)
 ```
 
 ```{r}
-boxplot(model_knn$results$Accuracy, ylab = "KNN",xlab = "Accuracy", horizontal = TRUE)
+par(mfrow=c(3,1))
+boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
+```
+```{r}
+model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
+model_rpart
+boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizontal = TRUE)
+```
+
+```{r}
+# Partial Least Squares
+model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
+model_pls
+boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
 ```
 
