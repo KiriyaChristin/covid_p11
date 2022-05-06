@@ -35,6 +35,7 @@ library(gganimate)
 library(tidyquant)
 library(caret)
 library(klaR)
+library(zoo)
 ```
 
 Topic: COVID-19 New cases
@@ -381,12 +382,34 @@ p1 = ggplot(data = df_q2_date, aes(x = Date)) + geom_line(aes(y=avg_new_cases), 
 ggplotly(p1)
 ```
 
-### Correlation Matrix
+## Correlation Matrix
 ```{r}
-df_q2_cor = df_q2 %>% drop_na(new_vaccinations, new_tests, new_cases, Price) %>% select(new_vaccinations, new_tests, new_cases, Price)
+df_q2 = as.data.frame(df_q2[order(df_q2$Date),]) %>% drop_na(new_vaccinations, new_tests, new_cases, Price)
+df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Price)
 cor(df_q2_cor)
 qtlcharts::iplotCorr(df_q2_cor)
 ```
+
+### Can't work.
+```{r, eval=FALSE}
+df_q2_date = df_q2 %>% group_by(Date) %>% summarize(avg_price = mean(Price), avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
+
+nrow_df_q2 = 360
+
+df_q2_time_cor <- data.frame(c(1), c(2), c(3), stringsAsFactors = FALSE)
+colnames(df_q2_time_cor) = c("start_time", "Price~new_vacc", "new_tests~new_cases")
+
+i = 1
+while (i <= nrow_df_q2) {
+  subset = df_q2_date[i:(i+29),]
+  rbind(df_q2_time_cor, subset[1,1], cor.test(subset$avg_price,
+                                           subset$avg_new_vac)$estimate,
+        cor.test(subset$avg_new_tests, subset$avg_new_cases)$estimate)
+  i = i + 30
+}
+glimpse(q2_time_cor)
+```
+
 
 
 ## beta function for each country
