@@ -409,6 +409,15 @@ while (i <= nrow_df_q2) {
 }
 glimpse(q2_time_cor)
 ```
+Created 2 dataframes each with only one column one called price new vac and new tests new cases
+```{r}
+cor_df1 <- data.frame(c(2), stringsAsFactors = FALSE)
+colnames(cor_df1) = c("Price~new_vacc")
+
+cor_df2 <- data.frame(c(3), stringsAsFactors = FALSE)
+colnames(cor_df1) = c("new_tests~new_cases")
+
+```
 
 
 
