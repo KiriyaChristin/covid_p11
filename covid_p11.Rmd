@@ -391,32 +391,48 @@ qtlcharts::iplotCorr(df_q2_cor)
 ```
 
 ### Can't work.
-```{r, eval=FALSE}
+```{r}
 df_q2_date = df_q2 %>% group_by(Date) %>% summarize(avg_price = mean(Price), avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
 
 nrow_df_q2 = 360
-
-df_q2_time_cor <- data.frame(c(1), c(2), c(3), stringsAsFactors = FALSE)
-colnames(df_q2_time_cor) = c("start_time", "Price~new_vacc", "new_tests~new_cases")
-
 i = 1
+cor1 <- list()
+time_ls <- list()
+j = 1
 while (i <= nrow_df_q2) {
-  subset = df_q2_date[i:(i+29),]
-  rbind(df_q2_time_cor, subset[1,1], cor.test(subset$avg_price,
-                                           subset$avg_new_vac)$estimate,
-        cor.test(subset$avg_new_tests, subset$avg_new_cases)$estimate)
+  subset <- df_q2_date[i:(i+29),]
+  cor1[[j]] <- cor.test(subset$avg_price,subset$avg_new_vac, method = "pearson")
+  time_ls[[j]] = subset[1,1]
+  j = j + 1
   i = i + 30
 }
-glimpse(q2_time_cor)
+out <- lapply(cor1, function(x) c(x$estimate, x$conf.int, x$p.value))
+D1 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
+names(D1)[2:ncol(D1)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
+#D1
+
+i = 1
+cor2 <- list()
+j = 1
+while (i <= nrow_df_q2) {
+  subset <- df_q2_date[i:(i+29),]
+  cor2[[j]] <- cor.test(subset$avg_new_tests,subset$avg_new_cases, method = "pearson")
+  j = j + 1
+  i = i + 30
+}
+out <- lapply(cor2, function(x) c(x$estimate, x$conf.int, x$p.value))
+D2 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
+names(D2)[2:ncol(D2)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
 ```
 Created 2 dataframes each with only one column one called price new vac and new tests new cases
 ```{r}
-cor_df1 <- data.frame(c(2), stringsAsFactors = FALSE)
-colnames(cor_df1) = c("Price~new_vacc")
-
-cor_df2 <- data.frame(c(3), stringsAsFactors = FALSE)
-colnames(cor_df1) = c("new_tests~new_cases")
-
+colnames(D1)[1] ="start_date"
+colnames(D1)[2] ="avg_price_avg_new_vacc"
+colnames(D1)[3] ="avg_new_tests_avg_new_cases"
+#,"avg_price_avg_new_vacc","avg_new_tests_avg_new_cases"
+df_q2_cor_time = D1 %>% mutate(start_date = time_ls, avg_new_tests_avg_new_cases = D2$estimate)
+#cor_df_time
+head(df_q2_cor_time)
 ```
 
 
@@ -476,6 +492,7 @@ df_q2_cor
 set.seed(1)
 df_q2_cor$level <- as.factor(df_q2_cor$level)
 split = 0.8
+df_q2_cor
 ## 80% 20% train/test
 trainIndex <- createDataPartition(df_q2_cor$level, p = split, list = FALSE)
 data_train <- df_q2_cor[trainIndex, ]
