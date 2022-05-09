@@ -318,12 +318,13 @@ p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_ne
 
 ggplotly(p1)
 ```
-
+# Use these colours
 ```{r}
 
 library("RColorBrewer")
 display.brewer.all(n=5)
-
+display.brewer.pal(n = 9, name = 'RdPu')
+# scale_fill_brewer(palette = "Dark2")+
 ```
 
 
