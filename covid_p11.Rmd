@@ -36,6 +36,7 @@ library(tidyquant)
 library(caret)
 library(klaR)
 library(zoo)
+library(pls)
 ```
 
 Topic: COVID-19 New cases
@@ -319,7 +320,7 @@ p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_ne
 ggplotly(p1)
 ```
 # Use these colours
-```{r}
+```{r, eval=FALSE}
 
 library("RColorBrewer")
 display.brewer.all(n=5)
@@ -379,7 +380,7 @@ df_q2_cor
 
 
 
-```{r}
+```{r, eval=FALSE}
 set.seed(1)
 df_q2_cor$level <- as.factor(df_q2_cor$level)
 split = 0.8
