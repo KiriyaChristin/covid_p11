@@ -267,7 +267,8 @@ j = 1
 while (i <= nrow_df_q2) {
   subset <- df_q2_date[i:(i+29),]
   cor1[[j]] <- cor.test(subset$avg_price,subset$avg_new_vac, method = "pearson")
-  time_ls[[j]] = subset[1,1]
+  time_ls[[j]] = subset$Date[1]
+  print(time_ls[[j]])
   j = j + 1
   i = i + 30
 }
@@ -288,6 +289,9 @@ while (i <= nrow_df_q2) {
 out <- lapply(cor2, function(x) c(x$estimate, x$conf.int, x$p.value))
 D2 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
 names(D2)[2:ncol(D2)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
+df_q2_date = as.data.frame(time_ls)
+df_q2_date = as.data.frame(t(df_q2_date))
+df_q2_date
 ```
 Created 2 dataframes each with only one column one called price new vac and new tests new cases
 ```{r}
@@ -295,11 +299,32 @@ colnames(D1)[1] ="start_date"
 colnames(D1)[2] ="avg_price_avg_new_vacc"
 colnames(D1)[3] ="avg_new_tests_avg_new_cases"
 #,"avg_price_avg_new_vacc","avg_new_tests_avg_new_cases"
-df_q2_cor_time = D1 %>% mutate(start_date = time_ls, avg_new_tests_avg_new_cases = D2$estimate)
+df_q2_cor_time = D1 %>% mutate(start_date = df_q2_date$V1, avg_new_tests_avg_new_cases = D2$estimate)
 #cor_df_time
-head(df_q2_cor_time)
+df_q2_cor_time$start_date = as.Date(df_q2_cor_time$start_date)
+df_q2_cor_time = df_q2_cor_time[ , -which(names(df_q2_cor_time) %in% c("conf.int2","p.value"))]
+df_q2_cor_time
 ```
 
+```{r}
+p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_new_tests_avg_new_cases, colour = "avg new_tests ~ avg new_cases"), size = 0.8) +
+  geom_line(aes(y=avg_price_avg_new_vacc, colour = 'avg price ~ avg new_vacc'), size = 0.8) +
+  scale_colour_manual("", 
+                      values = c("avg new_tests ~ avg new_cases"="#FF00CC", "avg price ~ avg new_vacc"="#3333FF")) +
+  ggtitle("Corelation Between Price and New vaccinations, New_tests and New_cases") + xlab("Date") +
+  ylab("Coorelation")+
+  #scale_fill_manual(values = c("light green", "yellow"))+
+  theme_bw()
+
+ggplotly(p1)
+```
+
+```{r}
+
+library("RColorBrewer")
+display.brewer.all(n=5)
+
+```
 
 
 ## beta function for each country
