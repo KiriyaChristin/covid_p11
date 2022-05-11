@@ -36,6 +36,7 @@ library(tidyquant)
 library(caret)
 library(klaR)
 library(zoo)
+library(pls)
 ```
 
 Topic: COVID-19 New cases
@@ -58,12 +59,6 @@ NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') # Th
 SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') # this is for China
 
 covid2 <- covid
-
-sp <- sp500
-sp$Change.. <- as.numeric(gsub("%","",sp$Change..))
-max = max(sp$Change..)
-max
-
 covid2$date = as.character(ymd(covid2$date))
 sp500$Date <- as.character(mdy(sp500$Date))
 TOPIX$Date <- as.character(mdy(TOPIX$Date))
@@ -126,135 +121,6 @@ fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_categor
          yaxis = list(showgrid = TRUE))
 unique(covid_joined$location)
 ```
-
-## evolution of countries through the pandemic (not finisihed)
-
-```{r, eval=FALSE}
-head(covid_joined)
-
-# Asset tickers
-
-tickers = c("SPY")
-
-price_data <- tq_get(tickers,
-                     from = '2017-12-27',
-                     to = '2021-12-27',
-                     get = 'stock.prices')
-
-price_data
-
-ret_data <- price_data %>%
-  group_by(symbol) %>%
-  tq_transmute(select = adjusted,
-               mutate_fun = periodReturn,
-               period = "daily",
-               col_rename = "ret")
-
-
-port_ret_tidyquant <- ret_data %>%
-  tq_portfolio(assets_col = symbol,
-               returns_col = ret,
-               col_rename = 'port_ret',
-               geometric = FALSE)
-
-
-
-covid_joined$Change.. <- as.numeric(gsub("%","",covid_joined$Change..))
-
-
-
-sp500$cr <- (as.numeric(gsub("%","",sp500$Change..))/100) %>% mutate(cr = cumprod(1 + sp500$cr))
-
-port_cumulative_ret_tidyquant
-
-plot(port_cumulative_ret_tidyquant$port_ret~port_cumulative_ret_tidyquant$date)
-
-port_ret_tidyquant <- ret_data %>%
-  tq_portfolio(assets_col = symbol,
-               returns_col = ret,
-               weights = wts,
-               col_rename = 'port_ret',
-               geometric = FALSE)
-
-port_cumulative_ret_tidyquant <- port_ret_tidyquant %>%
-  mutate(cr = cumprod(1 + port_ret))
-```
-
-## not finished
-
-```{r, eval=FALSE}
-library(tidyquant)
-
-# Asset tickers
-
-tickers = c('BND', 'VB', 'VEA', 'VOO', 'VWO')
-
-# Asset weights
-
-wts = c(0.1,0.2,0.25,0.25,0.2)
-
-price_data <- tq_get(tickers,
-                     from = '2013-01-01',
-                     to = '2018-03-01',
-                     get = 'stock.prices')
-
-ret_data <- price_data %>%
-  group_by(symbol) %>%
-  tq_transmute(select = adjusted,
-               mutate_fun = periodReturn,
-               period = "daily",
-               col_rename = "ret")
-
-port_ret_tidyquant <- ret_data %>%
-  tq_portfolio(assets_col = symbol,
-               returns_col = ret,
-               weights = wts,
-               col_rename = 'port_ret',
-               geometric = FALSE)
-
-ret_data <- price_data %>%
-  group_by(symbol) %>%
-  tq_transmute(select = adjusted,
-               mutate_fun = periodReturn,
-               period = "daily",
-               col_rename = "ret")
-
-wts_tbl <- tibble(symbol = tickers,
-                  wts = wts)
-ret_data <- left_join(ret_data,wts_tbl, by = 'symbol')
-
-ret_data <- ret_data %>%
-  mutate(wt_return = wts * ret)
-
-port_ret <- ret_data %>%
-  group_by(date) %>%
-  summarise(port_ret = sum(wt_return))
-
-port_cumulative_ret <- port_ret %>%
-  mutate(cr = cumprod(1 + port_ret))
-
-port_cumulative_ret_tidyquant <- port_ret %>%
-  mutate(cr = cumprod(1 + port_ret))
-
-
-port_ret_tidyquant
-port_ret
-
-```
-
-
-```{r, eval=FALSE}
-covid_joined_vis %>% 
-  ggplot(aes(total_cases, total_stock, size=pop, colour = country)) +
-  geom_point(alpha = 0.5, show.legend = TRUE) +
-  scale_size(range = c(2,12)) +
-  # Here comes the gganimate specific bits
-  labs(title = 'Year: {frame_time}', x = 'GDP per capita in USD', y = 'Life Expectancy') +
-  transition_time(year) +
-  shadow_wake(.3)+
-  ease_aes('linear')
-```
-
 
 ## CLEANING AND (OLD JOIN CODE) 
 
@@ -402,7 +268,8 @@ j = 1
 while (i <= nrow_df_q2) {
   subset <- df_q2_date[i:(i+29),]
   cor1[[j]] <- cor.test(subset$avg_price,subset$avg_new_vac, method = "pearson")
-  time_ls[[j]] = subset[1,1]
+  time_ls[[j]] = subset$Date[1]
+  print(time_ls[[j]])
   j = j + 1
   i = i + 30
 }
@@ -423,6 +290,9 @@ while (i <= nrow_df_q2) {
 out <- lapply(cor2, function(x) c(x$estimate, x$conf.int, x$p.value))
 D2 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
 names(D2)[2:ncol(D2)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
+df_q2_date = as.data.frame(time_ls)
+df_q2_date = as.data.frame(t(df_q2_date))
+df_q2_date
 ```
 Created 2 dataframes each with only one column one called price new vac and new tests new cases
 ```{r}
@@ -430,11 +300,33 @@ colnames(D1)[1] ="start_date"
 colnames(D1)[2] ="avg_price_avg_new_vacc"
 colnames(D1)[3] ="avg_new_tests_avg_new_cases"
 #,"avg_price_avg_new_vacc","avg_new_tests_avg_new_cases"
-df_q2_cor_time = D1 %>% mutate(start_date = time_ls, avg_new_tests_avg_new_cases = D2$estimate)
+df_q2_cor_time = D1 %>% mutate(start_date = df_q2_date$V1, avg_new_tests_avg_new_cases = D2$estimate)
 #cor_df_time
-head(df_q2_cor_time)
+df_q2_cor_time$start_date = as.Date(df_q2_cor_time$start_date)
+df_q2_cor_time = df_q2_cor_time[ , -which(names(df_q2_cor_time) %in% c("conf.int2","p.value"))]
+df_q2_cor_time
 ```
 
+```{r}
+p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_new_tests_avg_new_cases, colour = "avg new_tests ~ avg new_cases"), size = 0.8) +
+  geom_line(aes(y=avg_price_avg_new_vacc, colour = 'avg price ~ avg new_vacc'), size = 0.8) +
+  scale_colour_manual("", 
+                      values = c("avg new_tests ~ avg new_cases"="#FF00CC", "avg price ~ avg new_vacc"="#3333FF")) +
+  ggtitle("Corelation Between Price and New vaccinations, New_tests and New_cases") + xlab("Date") +
+  ylab("Coorelation")+
+  #scale_fill_manual(values = c("light green", "yellow"))+
+  theme_bw()
+
+ggplotly(p1)
+```
+# Use these colours
+```{r, eval=FALSE}
+
+library("RColorBrewer")
+display.brewer.all(n=5)
+display.brewer.pal(n = 9, name = 'RdPu')
+# scale_fill_brewer(palette = "Dark2")+
+```
 
 
 ## beta function for each country
@@ -489,7 +381,7 @@ df_q2_cor
 
 
 
-```{r}
+```{r, eval=FALSE}
 set.seed(1)
 df_q2_cor$level <- as.factor(df_q2_cor$level)
 split = 0.8
@@ -563,4 +455,6 @@ model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda
 model_rda
 boxplot(model_rda$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
 ```
+
+beta
 
