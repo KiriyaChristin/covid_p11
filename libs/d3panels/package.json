@@ -1,0 +1,31 @@
+{
+  "name": "d3panels",
+  "version": "1.8.4",
+  "description": "D3-based graphics panels",
+  "author": "Karl Broman <kbroman@gmail.com> (https://kbroman.org)",
+  "repository": "github:kbroman/d3panels",
+  "homepage": "https://kbroman.org/d3panels",
+  "license": "MIT",
+  "dependencies": {
+    "d3": "^7.3.0"
+  },
+  "files": [
+    "ReadMe.md",
+    "NEWS.md",
+    "package.json",
+    "License.md",
+    "d3panels.css",
+    "d3panels.js",
+    "d3panels.min.css",
+    "d3panels.min.js"
+  ],
+  "engines": {
+    "yarn": ">= 1.0.0"
+  },
+  "scripts": {
+    "postinstall": "node -e \"try { require('fs').symlinkSync(require('path').resolve('node_modules/@bower_components'), 'bower_components', 'junction') } catch (e) { }\""
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.6.1"
+  }
+}
