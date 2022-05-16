@@ -795,3 +795,5 @@ boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal =
 # Shiny app
 
 ---
+
+
