@@ -730,6 +730,19 @@ The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](https://yih
 ---
 class: center, middle
 
+# Analysis
+
+---
+
+# 
+
+---
+
+#
+
+---
+class: center, middle
+
 # Modeling
 
 ---
