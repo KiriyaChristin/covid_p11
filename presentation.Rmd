@@ -250,8 +250,14 @@ boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal =
 boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
 ```
+
 ---
 
-# Shiny app
+#
+
+---
+class: center, middle
+
+# Thanks for watching
 
 ---
