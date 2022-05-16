@@ -98,27 +98,6 @@ unique(covid_joined$location)
 ```
 
 # Joined data set
-```{r, eval=FALSE, include=FALSE}
-mean(df_q2_cor$Price)
-median(df_q2_cor$Price)
-quantile(df_q2_cor$Price, 0.25)
-
-df_q2_cor <- df_q2_cor %>% mutate(level = case_when((df_q2_cor$Price <= 1978.28) ~ "Low",
-                                                    ((df_q2_cor$Price > 1978.28) & (df_q2_cor$Price < 6511.446)) ~ "Medium",
-                                         
-                                                    (df_q2_cor$Price > 6511.446) ~ "High"
-))
-
-df_q2_cor$level <- as.factor(df_q2_cor$level)
-
-# define training control
-train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
-# train the model
-model_knn <- train(level~., data=df_q2_cor, trControl=train_control, method="knn")
-#model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
-model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
-model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda")
-```
 
 ```{r}
 #head(covid_joined[1-6])
@@ -213,6 +192,27 @@ ggplotly(p1)
 class: center, middle
 
 # Modeling
+```{r, include=FALSE}
+mean(df_q2_cor$Price)
+median(df_q2_cor$Price)
+quantile(df_q2_cor$Price, 0.25)
+
+df_q2_cor <- df_q2_cor %>% mutate(level = case_when((df_q2_cor$Price <= 1978.28) ~ "Low",
+                                                    ((df_q2_cor$Price > 1978.28) & (df_q2_cor$Price < 6511.446)) ~ "Medium",
+                                         
+                                                    (df_q2_cor$Price > 6511.446) ~ "High"
+))
+
+df_q2_cor$level <- as.factor(df_q2_cor$level)
+
+# define training control
+train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model_knn <- train(level~., data=df_q2_cor, trControl=train_control, method="knn")
+#model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
+model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
+model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda")
+```
 
 ---
 
