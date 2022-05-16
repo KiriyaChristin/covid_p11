@@ -90,15 +90,6 @@ fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_categor
          yaxis = list(showgrid = TRUE))
 unique(covid_joined$location)
 
-df_q2 = covid_joined
-colnames(df_q2)[7] = 'Change'
-write.csv(df_q2,"df_q2.csv")
-
-df_q2 = as.data.frame(df_q2[order(df_q2$Date),]) %>% drop_na(new_vaccinations, new_tests, new_cases, Price)
-df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Price)
-cor(df_q2_cor)
-qtlcharts::iplotCorr(df_q2_cor)
-
 mean(df_q2_cor$Price)
 median(df_q2_cor$Price)
 quantile(df_q2_cor$Price, 0.25)
@@ -728,9 +719,27 @@ Slides created via the R package [**xaringan**](https://github.com/yihui/xaringa
 The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](https://yihui.org/knitr/), and [R Markdown](https://rmarkdown.rstudio.com).
 
 ---
+# Joined data set
+```{r}
+covid_joined
+```
+
+---
 class: center, middle
 
 # Analysis
+
+```{r}
+df_q2 = covid_joined
+colnames(df_q2)[7] = 'Change'
+write.csv(df_q2,"df_q2.csv")
+
+df_q2 = as.data.frame(df_q2[order(df_q2$Date),]) %>% drop_na(new_vaccinations, new_tests, new_cases, Price)
+df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Price)
+cor(df_q2_cor)
+qtlcharts::iplotCorr(df_q2_cor)
+```
+
 
 ---
 
