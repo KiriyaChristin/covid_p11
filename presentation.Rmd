@@ -99,7 +99,7 @@ unique(covid_joined$location)
 
 ---
 # Joined data set
-```{r, eval=FALSE}
+```{r, eval=FALSE, include=FALSE}
 mean(df_q2_cor$Price)
 median(df_q2_cor$Price)
 quantile(df_q2_cor$Price, 0.25)
@@ -137,7 +137,6 @@ df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Pric
 ```
 
 ```{r}
-#df_q2_cor
 cor(df_q2_cor)
 qtlcharts::iplotCorr(df_q2_cor)
 ```
@@ -202,7 +201,7 @@ p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_ne
   theme_bw()
 ```
 
-```{r}
+```{r, fig.height=7, fig.width=10}
 ggplotly(p1)
 ```
 
