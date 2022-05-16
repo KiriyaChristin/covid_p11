@@ -222,7 +222,7 @@ Using the historical data to cluster and create models
 
 --
 
-- clustering the Price data into 3 groups[(High, Median, Low)](https://remarkjs.com)
+- Classifying the Price data into 3 groups[(High, Median, Low)](https://remarkjs.com)
 
 --
 
@@ -248,12 +248,13 @@ Using the historical data to cluster and create models
 par(mfrow=c(3,1))
 boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
-boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
 ```
 
 ---
 
-#
+```{r, fig.height=6, fig.width=10}
+boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
+```
 
 ---
 class: center, middle
