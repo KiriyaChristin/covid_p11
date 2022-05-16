@@ -244,7 +244,7 @@ Using the historical data to cluster and create models
 
 # Analysis and evaluate the model
 
-```{r,echo=FALSE}
+```{r model}
 par(mfrow=c(3,1))
 boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
