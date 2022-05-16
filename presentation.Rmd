@@ -205,3 +205,53 @@ p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_ne
 ggplotly(p1)
 ```
 
+---
+
+#
+
+---
+class: center, middle
+
+# Modeling
+
+---
+
+# Models developing and Machine learning
+
+Using the historical data to cluster and create models
+
+--
+
+- clustering the Price data into 3 groups[(High, Median, Low)](https://remarkjs.com)
+
+--
+
+- building the model[(KNN,PLS,RDA)](https://remarkjs.com)
+
+--
+
+- calculate the accuracy of the model
+
+--
+
+- analysis and evaluate the model
+
+--
+
+- shiny app
+
+---
+
+# Analysis and evaluate the model
+
+```{r,echo=FALSE}
+par(mfrow=c(3,1))
+boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
+```
+---
+
+# Shiny app
+
+---
