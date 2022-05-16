@@ -97,7 +97,6 @@ unique(covid_joined$location)
 # qtlcharts::iplotCorr(df_q2_cor)
 ```
 
----
 # Joined data set
 ```{r, eval=FALSE, include=FALSE}
 mean(df_q2_cor$Price)
@@ -195,13 +194,14 @@ p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_ne
   geom_line(aes(y=avg_price_avg_new_vacc, colour = 'avg price ~ avg new_vacc'), size = 0.8) +
   scale_colour_manual("", 
                       values = c("avg new_tests ~ avg new_cases"="#FF00CC", "avg price ~ avg new_vacc"="#3333FF")) +
-  ggtitle("Corelation Between Price and New vaccinations, New_tests and New_cases") + xlab("Date") +
+  ggtitle("Price~New_vaccinations, New_tests~New_cases") + xlab("Date") +
   ylab("Coorelation")+
   #scale_fill_manual(values = c("light green", "yellow"))+
   theme_bw()
 ```
 
-```{r, fig.height=7, fig.width=10}
+# Correlation of variables over the time
+```{r, fig.height=6, fig.width=10}
 ggplotly(p1)
 ```
 
