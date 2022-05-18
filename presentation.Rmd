@@ -82,51 +82,38 @@ covid_joined <- covid_joined %>%
     Date >= "2020-03-11" & Date < "2021-01-01" ~ "1st year", 
     Date >= "2021-01-01" & Date < "2022-01-01" ~ "2nd year", 
     Date >= "2022-01-01" & Date < "2023-01-01" ~ "3rd year (ongoing)"))
-
-fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_category, type = "box") %>% layout(boxmode = "group", title = 'Distribution of gains and losses over the pandemic',
-         xaxis = list(showgrid = TRUE),
-         yaxis = list(showgrid = TRUE))
-unique(covid_joined$location)
-
-#df_q2 = covid_joined
-#colnames(df_q2)[7] = 'Change'
-#write.csv(df_q2,"df_q2.csv")
-
-#df_q2 = as.data.frame(df_q2[order(df_q2$Date),]) %>% drop_na(new_vaccinations, new_tests, new_cases, Price)
-#df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Price)
-# cor(df_q2_cor)
-# qtlcharts::iplotCorr(df_q2_cor)
 ```
 
 
----
+
+class: inverse, middle, center
 
 # Research overview
 
+---
+
+## Analyzing the relationship & impact of the Covid-19 on public equity markets and respective country economy
+
 --
 
-- Analyzing the impact of the Covid-19 pandemic on public equity markers and respective country economy
+  1.    Exploratory analysis of data sets
 
 --
-
-  [1] Exploratory analysis
   
-  [2] Model
-  
-  [3]
+  2.    Correlation modelling
 
 --
-
+  
+  3.    Model development and machine learning analysis
 
 ---
 
 # data overview
 
-
 --
 
 .pull-left[
-### Analysis focused to key countries
+### focusing on key countries
 
 - China
 
@@ -138,32 +125,65 @@ unique(covid_joined$location)
 
 - United States 
 ]
+
 --
 
 .pull-left[
 ### Data sets used
 
-- respective country index
+- Covid-19 data set
 
-  - Japan: Tokyo Stock Price Index
+- respective country index representative of country stock market performance
 
-  - United States: The Standard and Poor's 500
-
-  - Australia: Australian Securities Exchange index
-
-  - China: Shanghai Composite
-  
-  - India: The NIFTY 50
-
-- collection of US company stocks
-
-- Supplied Covid-19 data set
+- collection of US stocks
 ]
+
+---
+
+class: inverse, middle, center
+
+# Section 1: Exploratory Analysis
+
+---
+
+### Analysing distribution of gains and losses over pandemic for respective country stock market
+
 --
+
+- [Excess kurtosis](https://remarkjs.com) in 1st year is consistent with the covid crisis
+
+- [Stablisation](https://remarkjs.com) over 2nd and 2rd year
+
+```{r, include=FALSE}
+covid_joined <- covid_joined %>% 
+  filter(Date >= "2020-03-11") %>%
+  mutate(Year_category = case_when( 
+    Date >= "2020-03-11" & Date < "2021-01-01" ~ "1st year", 
+    Date >= "2021-01-01" & Date < "2022-01-01" ~ "2nd year", 
+    Date >= "2022-01-01" & Date < "2023-01-01" ~ "3rd year (ongoing)"))
+
+fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_category, type = "box") %>% layout(boxmode = "group",
+         xaxis = list(showgrid = TRUE),
+         yaxis = list(showgrid = TRUE))
+
+fig <- fig %>% layout(xaxis = list(title = 'daily gain/loss (%)'))
+```
+
+
+```{r, warning=FALSE, fig.height=5.5, fig.width=10, echo=FALSE}
+fig
+```
+
+---
+
+class: inverse, middle, center
+
+# correlation modelling
 
 ---
 
 # Correlation Matrix
+
 ```{r, include=FALSE}
 df_q2 = covid_joined
 colnames(df_q2)[7] = 'Change'
@@ -179,6 +199,7 @@ qtlcharts::iplotCorr(df_q2_cor)
 ```
 
 ---
+
 ```{r, include=FALSE}
 df_q2_date = df_q2 %>% group_by(Date) %>% summarize(avg_price = mean(Price), avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
 
@@ -245,25 +266,15 @@ ggplotly(p1)
 
 ---
 
-# Focused analysis On vaccine manufacturers during covid
+# Focused US (s&p500) analysis (150D rolling correlation)
 
 --
 
-- Interested if vaccine manufacturers exhibited anomalous behavior during Covid-19
+- Vaccine manufacturers exhibited [anomalous](https://remarkjs.com) behavior 
 
---
+- they reached [negative](https://remarkjs.com) correlation
 
-- Interested whether this changed over time
-
---
-
-- We Calculated a 150 day rolling correlation between selected US companies and the US index (S&P500)
-
---
-
----
-
-# Focused analysis On vaccine manufacturers during covid cont.
+- Pfizer significant [decreasing](https://remarkjs.com) correlation as pandemic progressed
 
 ```{r, include=FALSE}
 mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
@@ -328,28 +339,23 @@ corr_joined = rbind(corr_AMZN, corr_NFLX, corr_GOOG, corr_NVAX, corr_V, corr_FB,
 corr_joined$Date <- as.Date(corr_joined$Date)
 corr_joined
 
-p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + labs(x = "Date", y = "rolling correlation (150D period)") + ggtitle("examining correlation of vaccine macufacturers compared to typical stocks") + theme_clean()
+p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + labs(x = "Date", y = "rolling correlation (150D period)") + theme_bw()
 ```
 
---
-
-- Novavax, Moderna, and Pfizer were least correlated to S&P500 during Covid-19 among assets analysed
-
---
-
-- Behavior of Pfizer clearly went through change, initially was correlated but as pandemic progressed became less correlated
-
---
-
-```{r,  fig.height=5.6, fig.width=10}
+```{r, fig.height=5.05, fig.width=9.1, echo=FALSE}
 ggplotly(p)
 ```
+
+class: inverse, middle, center
+
+# model development and machine learning
 
 ---
 
 class: center, middle
 
 # Modeling
+
 ```{r, include=FALSE}
 mean(df_q2_cor$Price)
 median(df_q2_cor$Price)
@@ -376,7 +382,7 @@ model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda
 
 # Models developing and Machine learning
 
-Using the historical data to cluster and create models
+Using the historical data to classify and create models
 
 --
 
