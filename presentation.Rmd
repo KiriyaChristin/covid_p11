@@ -37,6 +37,7 @@ library(tidyquant)
 library(caret)
 library(klaR)
 library(zoo)
+library(patchwork)
 
 covid = read.csv("owid-covid-data.csv")
 sp500 = read.csv("SPY Historical Data.csv", fileEncoding = 'UTF-8-BOM')
@@ -97,13 +98,71 @@ unique(covid_joined$location)
 # qtlcharts::iplotCorr(df_q2_cor)
 ```
 
-# Joined data set
-
-```{r}
-#head(covid_joined[1-6])
-```
 
 ---
+
+# Research overview
+
+--
+
+- Analyzing the impact of the Covid-19 pandemic on public equity markers and respective country economy
+
+--
+
+  [1] Exploratory analysis
+  
+  [2] Model
+  
+  [3]
+
+--
+
+
+---
+
+# data overview
+
+
+--
+
+.pull-left[
+### Analysis focused to key countries
+
+- China
+
+- India
+
+- Japan
+
+- Australia
+
+- United States 
+]
+--
+
+.pull-left[
+### Data sets used
+
+- respective country index
+
+  - Japan: Tokyo Stock Price Index
+
+  - United States: The Standard and Poor's 500
+
+  - Australia: Australian Securities Exchange index
+
+  - China: Shanghai Composite
+  
+  - India: The NIFTY 50
+
+- collection of US company stocks
+
+- Supplied Covid-19 data set
+]
+--
+
+---
+
 # Correlation Matrix
 ```{r, include=FALSE}
 df_q2 = covid_joined
@@ -186,9 +245,108 @@ ggplotly(p1)
 
 ---
 
-#
+# Focused analysis On vaccine manufacturers during covid
+
+--
+
+- Interested if vaccine manufacturers exhibited anomalous behavior during Covid-19
+
+--
+
+- Interested whether this changed over time
+
+--
+
+- We Calculated a 150 day rolling correlation between selected US companies and the US index (S&P500)
+
+--
 
 ---
+
+# Focused analysis On vaccine manufacturers during covid cont.
+
+```{r, include=FALSE}
+mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
+myStocks <-lapply(mySymbols, function(x) {getSymbols(x, src = "yahoo", 
+                                                     from = "2020-01-01", 
+                                                     to = "2022-04-04",
+                                                     periodicity = "daily",
+                                                     auto.assign=FALSE)} )
+
+closePrices <- lapply(myStocks, Cl)
+closePrices <- as.data.frame(do.call(merge, closePrices))
+closePrices <- na.omit(log(closePrices/lag(closePrices)))
+closePrices <- rownames_to_column(closePrices, "Date")
+
+date <- closePrices["Date"]
+date
+
+# will need to probably write a function for this later as at the moment i am just hard coding this
+
+corr_AMZN <- as.data.frame(roll_cor(closePrices$AMZN.Close, closePrices$GSPC.Close, width = 150)) %>% cbind(date) %>% na.omit
+corr_NFLX <- as.data.frame(roll_cor(closePrices$NFLX.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_MSFT <- as.data.frame(roll_cor(closePrices$MSFT.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_GOOG <- as.data.frame(roll_cor(closePrices$GOOG.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_NVAX <- as.data.frame(roll_cor(closePrices$NVAX.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_DIS <- as.data.frame(roll_cor(closePrices$DIS.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_WMT <- as.data.frame(roll_cor(closePrices$WMT.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_COST <- as.data.frame(roll_cor(closePrices$COST.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_V <- as.data.frame(roll_cor(closePrices$V.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_FB <- as.data.frame(roll_cor(closePrices$FB.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_AXP <- as.data.frame(roll_cor(closePrices$AXP.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_CMCSA <- as.data.frame(roll_cor(closePrices$CMCSA.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_PFE <- as.data.frame(roll_cor(closePrices$PFE.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+corr_MRNA <- as.data.frame(roll_cor(closePrices$MRNA.Close, closePrices$GSPC.Close, width = 150))%>% cbind(date) %>% na.omit
+
+corr_AMZN$symbol <- "AMZN"
+corr_NFLX$symbol <- "NFLX"
+corr_GOOG$symbol <- "GOOG"
+corr_NVAX$symbol <- "NVAX"
+corr_V$symbol <- "VISA"
+corr_FB$symbol <- "FB"
+corr_MSFT$symbol <- "MSFT"
+corr_PFE$symbol <- "PFE"
+corr_MRNA$symbol <- "MRNA"
+
+colnames(corr_AMZN)[1] = "corr"
+colnames(corr_NFLX)[1] = "corr"
+colnames(corr_MSFT)[1] = "corr"
+colnames(corr_GOOG)[1] = "corr"
+colnames(corr_NVAX)[1] = "corr"
+colnames(corr_DIS)[1] = "corr"
+colnames(corr_WMT)[1] = "corr"
+colnames(corr_COST)[1] = "corr"
+colnames(corr_V)[1] = "corr"
+colnames(corr_FB)[1] = "corr"
+colnames(corr_AXP)[1] = "corr"
+colnames(corr_CMCSA)[1] = "corr"
+colnames(corr_PFE)[1] = "corr"
+colnames(corr_MRNA)[1] = "corr"
+
+corr_joined = rbind(corr_AMZN, corr_NFLX, corr_GOOG, corr_NVAX, corr_V, corr_FB, corr_MSFT, corr_PFE, corr_MRNA)
+
+corr_joined$Date <- as.Date(corr_joined$Date)
+corr_joined
+
+p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + labs(x = "Date", y = "rolling correlation (150D period)") + ggtitle("examining correlation of vaccine macufacturers compared to typical stocks") + theme_clean()
+```
+
+--
+
+- Novavax, Moderna, and Pfizer were least correlated to S&P500 during Covid-19 among assets analysed
+
+--
+
+- Behavior of Pfizer clearly went through change, initially was correlated but as pandemic progressed became less correlated
+
+--
+
+```{r,  fig.height=5.6, fig.width=10}
+ggplotly(p)
+```
+
+---
+
 class: center, middle
 
 # Modeling
