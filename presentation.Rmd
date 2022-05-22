@@ -15,6 +15,7 @@ output:
 ```{r setup, include=FALSE}
 # Data input and processing
 options(htmltools.dir.version = FALSE)
+
 library(tidyverse)
 library(ggplot2)
 library(maps)
@@ -88,55 +89,59 @@ covid_joined <- covid_joined %>%
 
 class: inverse, middle, center
 
-# Research overview
+# Background & aim
 
 ---
 
-## Analyzing the relationship & impact of the Covid-19 on public equity markets and respective country economy
+## Analyse the relationship & impact of the Covid-19 on public equity markets and respective country economy.
 
 --
 
-  1.    Exploratory analysis of data sets
+  1.    Exploratory analysis of data
 
 --
   
-  2.    Correlation modelling
+  2.    Correlation modelling & determining relationships
 
 --
   
   3.    Model development and machine learning analysis
 
+--
+
+- Focusing on key countries (respective indices)
+
+  - China
+
+  - India
+
+  - Japan
+
+  - Australia
+
+  - United States 
+
 ---
 
-# data overview
+# Approach
+
+- Data collection
+
+  - Various methods of web scrapping and csv's joined with covid data
+  
+  - Using data from respective country index
 
 --
 
-.pull-left[
-### focusing on key countries
+- Data analysis
 
-- China
-
-- India
-
-- Japan
-
-- Australia
-
-- United States 
-]
+  - Adopting rolling window statistics
 
 --
 
-.pull-left[
-### Data sets used
+- Models
 
-- Covid-19 data set
-
-- respective country index representative of country stock market performance
-
-- collection of US stocks
-]
+  - Adopting other models (PLS, RDA) to predict price levels 
 
 ---
 
@@ -404,25 +409,41 @@ Using the historical data to classify and create models
 
 - shiny app
 
+--
+
+- evaluation focused on accuracy comparison
+
+--
+
 ---
 
-# Analysis and evaluate the model
+# Analysis and accuracy evaluation
 
-```{r model}
+```{r model, fig.height=5.5, fig.width=10, echo=FALSE}
 par(mfrow=c(3,1))
 boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
-```
-
----
-
-```{r, fig.height=6, fig.width=10}
 boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
 ```
 
 ---
-class: center, middle
 
-# Thanks for watching
+# group contribution
+
+- Presentation: Maxim, Jasmine and Jia
+
+- Q&A: all members
+
+- Others:
+
+- Section 1 code: Max
+
+- Section 2 code: Jasmie and Christin
+
+- Section 3 code: Paul and Marin
+
+- Report: Jia
+
+- Shiny app: Jinting
 
 ---
