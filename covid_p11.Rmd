@@ -405,18 +405,19 @@ algo_df <- algo_df %>%
          Average.200.moving = EMA(Price, 200),
          
          # meeting conditions of indicators and consulting the machine learning model
-         position = if_else(Average.50.moving > Average.200.moving & pred == "High" , 1, -1) %>% lag() %>% replace_na(0),
-         
+         position = if_else(Average.50.moving < Average.200.moving & pred == "Low", -1, 1) %>% lag() %>% replace_na(0),
+
          # PNL calc
-         PNL = position * profit.loss * 0.5)
+         PNL = position * profit.loss
+)
 
 # creating xts object
-Algo_xts <- xts(algo_df$profit.loss, order.by = algo_df$Date)
+Algo_xts <- xts(algo_df$PNL, order.by = algo_df$Date)
 
 ########### These are the results for trading the algo for the S&P500
 
 # overall profit (%) which is 22 percent profit in portfolio
-(prod(algo_df$profit.loss + 1) - 1) * 100
+(prod(algo_df$PNL + 1) - 1) * 100
 
 # lowest equity drop
 maxDrawdown(Algo_xts)
@@ -425,7 +426,7 @@ maxDrawdown(Algo_xts)
 table.AnnualizedReturns(Algo_xts) 
 
 # summary with charting
-charts.PerformanceSummary(Algo_xts, )
+charts.PerformanceSummary(Algo_xts)
 
 # rolling performance with ratios
 charts.RollingPerformance(Algo_xts)
