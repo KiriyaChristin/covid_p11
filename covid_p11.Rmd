@@ -422,7 +422,7 @@ Algo_xts <- xts(algo_df$profit.loss, order.by = algo_df$Date)
 maxDrawdown(Algo_xts)
 
 # annualized returns
-table.AnnualizedReturns(Algo_xts)
+table.AnnualizedReturns(Algo_xts) 
 
 # summary with charting
 charts.PerformanceSummary(Algo_xts, )
