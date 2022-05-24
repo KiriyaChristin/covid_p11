@@ -388,7 +388,7 @@ pred <- predict(model_knn, data_test)
 prediction_df <- cbind(pred, data_test)
 ```
 
-```{r, fig.height=7, fig.width=9.1}
+```{r, fig.height=7, fig.width=11}
 # data joining so we are able to consult the ML model
 algo_df <- inner_join(prediction_df[c("Date", "pred")], Prices_joined, by = "Date")
 algo_df$Date <- as.Date(algo_df$Date)
@@ -426,8 +426,6 @@ table.AnnualizedReturns(Algo_xts)
 
 # summary with charting
 charts.PerformanceSummary(Algo_xts, )
-
-help("charts.PerformanceSummary")
 
 # rolling performance with ratios
 charts.RollingPerformance(Algo_xts)
