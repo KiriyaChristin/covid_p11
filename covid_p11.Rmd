@@ -37,6 +37,9 @@ library(caret)
 library(klaR)
 library(zoo)
 library(pls)
+library(PerformanceAnalytics)
+library(TTR)
+
 ```
 
 Topic: COVID-19 New cases
