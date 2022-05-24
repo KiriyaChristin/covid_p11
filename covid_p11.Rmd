@@ -398,12 +398,15 @@ algo_df$Date <- as.Date(algo_df$Date)
 
 algo_df <- algo_df %>%
   arrange(Date) %>% 
-  mutate(profit.loss = replace_na(Price/lag(Price) - 1, 0), 
+  mutate(profit.loss = replace_na(Price/lag(Price) - 1, 0),
+         
          # using exponential moving averages
          Average.50.moving = EMA(Price, 50),
          Average.200.moving = EMA(Price, 200),
+         
          # meeting conditions of indicators and consulting the machine learning model
          position = if_else(Average.50.moving > Average.200.moving & pred == "High" , 1, -1) %>% lag() %>% replace_na(0),
+         
          # PNL calc
          PNL = position * profit.loss * 0.5)
 
