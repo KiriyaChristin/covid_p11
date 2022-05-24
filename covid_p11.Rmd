@@ -328,133 +328,117 @@ display.brewer.pal(n = 9, name = 'RdPu')
 # scale_fill_brewer(palette = "Dark2")+
 ```
 
-
-## beta function for each country
-```{r, eval=FALSE}
-#covid_clean
-df_q2_beta = df_q2 %>% drop_na(Lprice2, Lnew_cases2)
-df_q2_chn = df_q2_beta %>% filter(location == "China")
-df_q2_jpn = df_q2_beta %>% filter(location == "Japan")
-df_q2_usa = df_q2_beta %>% filter(location == "United States")
-df_q2_ind = df_q2_beta %>% filter(location == "India")
-chn_beta_price_case = beta(df_q2_chn$Lprice2, df_q2_chn$Lnew_cases2)
-jpn_beta_price_case = beta(df_q2_jpn$Lprice2, df_q2_jpn$Lnew_cases2)
-usa_beta_price_case = beta(df_q2_usa$Lprice2, df_q2_usa$Lnew_cases2)
-ind_beta_price_case = beta(df_q2_ind$Lprice2, df_q2_ind$Lnew_cases2)
-aus_beta_price_case = beta(df_q2_aus$Lprice2, df_q2_aus$Lnew_cases2)
-plot(jpn_beta_price_case,type="l")
-plot(chn_beta_price_case,type="l", col = "red")
-plot(aus_beta_price_case,type="l", col = "light blue")
-plot(ind_beta_price_case,type="l", col = "light green")
-plot(usa_beta_price_case,type="l", col = "yellow")
-```
-
-
 # Question3 
 
-## Building the model
 ```{r}
-glm1= glm(Price ~ new_vaccinations + new_tests + new_cases,data = df_q2_cor)
-summary(glm1)
-```
-
-## Assumption checking
-```{r}
-plot(glm1, which = 1:2)
-```
-```{r}
-mean(df_q2_cor$Price)
-median(df_q2_cor$Price)
-quantile(df_q2_cor$Price, 0.25)
-```
-
-```{r}
-#df_q2_cor$level <- ifelse(df_q2_cor$Price < 1978.28, "low", "high")
-
-df_q2_cor <- df_q2_cor %>% mutate(level = case_when((df_q2_cor$Price <= 1978.28) ~ "Low",
-                                                    ((df_q2_cor$Price > 1978.28) & (df_q2_cor$Price < 6511.446)) ~ "Medium",
-                                         
-                                                    (df_q2_cor$Price > 6511.446) ~ "High"
-))
-df_q2_cor
-```
-
-
-
-```{r, eval=FALSE}
 set.seed(1)
-df_q2_cor$level <- as.factor(df_q2_cor$level)
-split = 0.8
-df_q2_cor
-## 80% 20% train/test
-trainIndex <- createDataPartition(df_q2_cor$level, p = split, list = FALSE)
-data_train <- df_q2_cor[trainIndex, ]
-data_test <- df_q2_cor[-trainIndex, ]
-##naive bayes model
-model = train(df_q2_cor$level ~ df_q2_cor$new_vaccinations+df_q2_cor$new_tests+df_q2_cor$new_cases+df_q2_cor$Price, data = data_train)
-```
+# will be using this later as ideally with the shiny app we can pick and predict a particlar stock
+mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
+myStocks <-lapply(mySymbols, function(x) {getSymbols(x, src = "yahoo", 
+                                                     from = "2020-01-01", 
+                                                     to = "2022-04-04",
+                                                     periodicity = "daily",
+                                                     auto.assign=FALSE)} )
 
+# cleaning, wrangling, transforming, joining section for algo
+Prices <- lapply(myStocks, Cl)
+Prices <- as.data.frame(do.call(merge, Prices))
+Prices <- rownames_to_column(Prices, "Date")
+US_data <- df_1
+Prices_joined <- inner_join(US_data,Prices)
+Prices_joined$Change.. <- as.numeric(gsub("%","",Prices_joined$Change..))
 
-#Marin
+# classifying
+MLdata <- Prices_joined %>% mutate(level = case_when((Prices_joined$Change.. <= 0.00) ~ "Low", (Prices_joined$Change.. > 0.00) ~ "High"))
+MLdata <- dplyr::select(MLdata,Date,level,Price,new_vaccinations,new_cases,new_tests) %>% na.omit()
+MLdata$level <- as.factor(MLdata$level)
 
-```{r}
-table(df_q2_cor$level)
-```
+# normalizing
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x))) }
+Norm_MLdata <- as.data.frame(lapply(MLdata[3:5], normalize)) 
+Norm_MLdata <- cbind(Norm_MLdata, MLdata[c("level", "Date")])
 
-```{r}
-df_q2_cor$level <- as.factor(df_q2_cor$level)
-df_q2_cor
-```
+# creating 80/20 split
+trainIndex <- createDataPartition(Norm_MLdata$level, p = 0.8, list = FALSE)
+data_test <- Norm_MLdata[trainIndex, ]
+data_train <- Norm_MLdata[-trainIndex, ]
 
-```{r,warning=FALSE}
-# load the library
-library(caret)
-# define training control
-train_control <- trainControl(method="boot", number=100)
-# train the model
-model <- train(level~., data=df_q2_cor, trControl=train_control, method="nb")
-# summarize results
-print(model)
-```
-
-```{r,warning=FALSE}
 # define training control
 train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
 # train the model
-model_knn <- train(level~., data=df_q2_cor, trControl=train_control, method="knn")
-#model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
-model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
-model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda")
-# summarize results
-print(model_knn)
-```
+model_knn <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="knn")
+model_rpart <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="rpart")
 
-```{r}
+# PLS accuracy looked weird so i removed it and replaced it with rpart which works now because i fixed it
+#model_pls <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="pls")
+
+model_rda <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="rda")
+
 par(mfrow=c(3,1))
 boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
-#boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizontal = TRUE)
-boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
-## redundancy analysis
+#boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
 boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
-```
-```{r}
-model_rpart <- train(level~., data=df_q2_cor, trControl=train_control, method="rpart")
-model_rpart
-boxplot(model_rpart$results$Accuracy, ylab = "rpart",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_rpart$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
+
+# KNN is best model so we are using that
+pred <- predict(model_knn, data_test)
+prediction_df <- cbind(pred, data_test)
 ```
 
 ```{r}
-# Partial Least Squares
-model_pls <- train(level~., data=df_q2_cor, trControl=train_control, method="pls")
-model_pls
-boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
+# data joining so we are able to consult the ML model
+algo_df <- inner_join(prediction_df[c("Date", "pred")], Prices_joined, by = "Date")
+algo_df$Date <- as.Date(algo_df$Date)
+
+
+# simple fast moving crossover over slow moving average algo
+
+algo_df <- algo_df %>%
+  arrange(Date) %>% 
+  mutate(profit.loss = replace_na(Price/lag(Price) - 1, 0))
+
+indicators <- algo_df %>% 
+  arrange(Date) %>%
+  mutate(
+    
+    # using exponential moving averages
+    Average.50.moving = EMA(Price, 50),
+    Average.200.moving = EMA(Price, 200),
+    
+    # meeting conditions of indicators and consulting the machine learning model
+    position = if_else(Average.50.moving > Average.200.moving & pred == "High" , 1, -1) %>% lag() %>% replace_na(0),
+    
+    # PNL calc
+    PNL = position * profit.loss * 0.5
+  )
+
+# creating xts object
+Algo_xts <- xts(algo_df$profit.loss, order.by = algo_df$Date)
+
+########### These are the results for trading the algo for the S&P500
+
+# overall profit (%) which is 22 percent profit in portfolio
+(prod(algo_df$profit.loss + 1) - 1) * 100
+
+# lowest equity drop
+maxDrawdown(Algo_xts)
+
+# annualized returns
+table.AnnualizedReturns(Algo_xts)
+
+# summary with charting
+charts.PerformanceSummary(Algo_xts, )
+
+help("charts.PerformanceSummary")
+
+# rolling performance with ratios
+charts.RollingPerformance(Algo_xts)
+
+# returns
+charts.Bar(Algo_xts)
 ```
 
-```{r}
-model_rda <- train(level~., data=df_q2_cor, trControl=train_control, method="rda")
-model_rda
-boxplot(model_rda$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
-```
 
-beta
+
 
