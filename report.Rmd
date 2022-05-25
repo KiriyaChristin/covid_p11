@@ -3,14 +3,17 @@ title: "Data3888 project report"
 author: "Covid_p11"
 date: '2022-05-25'
 output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
   html_document:
     fig_caption: yes
     number_sections: yes
     self_contained: yes
     theme: flatly
-    toc: true
+    toc: yes
     toc_depth: 3
-    toc_float: true
+    toc_float: yes
     code_folding: hide
 ---
 
