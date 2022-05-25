@@ -76,8 +76,6 @@ covid_IND <- covid2 %>% filter(location == "India")
 covid_JPN <- covid2 %>% filter(location == "Japan")
 covid_CHN <- covid2 %>% filter(location == "China")
 
-covid_US
-
 df_1 = inner_join(sp500, covid_US, by = "Date")
 df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
 df_3 = inner_join(ASX200, covid_AUS, by = "Date")
@@ -122,6 +120,8 @@ fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_categor
          xaxis = list(showgrid = TRUE),
          yaxis = list(showgrid = TRUE))
 unique(covid_joined$location)
+
+fig
 ```
 
 ## CLEANING AND (OLD JOIN CODE) 
@@ -416,7 +416,7 @@ Algo_xts <- xts(algo_df$PNL, order.by = algo_df$Date)
 
 ########### These are the results for trading the algo for the S&P500
 
-# overall profit (%) which is 22 percent profit in portfolio
+# overall profit (%) which is 20 percent profit in portfolio
 (prod(algo_df$PNL + 1) - 1) * 100
 
 # lowest equity drop
