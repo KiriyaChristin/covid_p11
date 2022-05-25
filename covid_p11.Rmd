@@ -353,7 +353,12 @@ Prices_joined$Change.. <- as.numeric(gsub("%","",Prices_joined$Change..))
 # classifying
 MLdata <- Prices_joined %>% mutate(level = case_when((Prices_joined$Change.. <= 0.00) ~ "Low", (Prices_joined$Change.. > 0.00) ~ "High"))
 MLdata <- dplyr::select(MLdata,Date,level,Price,new_vaccinations,new_cases,new_tests) %>% na.omit()
+
+# making sure its named Price so that if we select another variable in the shiny app which is called something different it can be changed to Price as the name
+colnames(MLdata)[3] == "Price"
+
 MLdata$level <- as.factor(MLdata$level)
+
 
 # normalizing
 normalize <- function(x) {
@@ -396,6 +401,10 @@ algo_df$Date <- as.Date(algo_df$Date)
 
 # simple fast moving crossover over slow moving average algo
 
+
+# risking 100% of portfolio per trade
+port.Risk <- 1
+
 algo_df <- algo_df %>%
   arrange(Date) %>% 
   mutate(profit.loss = replace_na(Price/lag(Price) - 1, 0),
@@ -408,7 +417,7 @@ algo_df <- algo_df %>%
          position = if_else(Average.50.moving < Average.200.moving & pred == "Low", -1, 1) %>% lag() %>% replace_na(0),
 
          # PNL calc
-         PNL = position * profit.loss
+         PNL = position * profit.loss * port.Risk
 )
 
 # creating xts object
@@ -433,6 +442,8 @@ charts.RollingPerformance(Algo_xts)
 
 # returns
 charts.Bar(Algo_xts)
+Algo_xts
+
 ```
 
 
