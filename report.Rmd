@@ -46,3 +46,10 @@ A hypothesis formulated by (Diermier, Ibbotson, & Siegel, 1984; Ibbotson & Chen,
 
 
 # Group Contribution
+
+
+# References
+
+- Harjoto, M., Rossi, F., Lee, R., & Sergi, B. (2021). How do equity markets react to COVID-19? Evidence from emerging and developed countries. Journal Of Economics And Business, 115, 105966. https://doi.org/10.1016/j.jeconbus.2020.105966
+
+- Seven, Ü., & Yılmaz, F. (2021). World equity markets and COVID-19: Immediate response and recovery prospects. Research In International Business And Finance, 56, 101349. https://doi.org/10.1016/j.ribaf.2020.101349
