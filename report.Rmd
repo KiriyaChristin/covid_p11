@@ -1,11 +1,42 @@
 ---
-title: "report"
+title: "Data3888 project report"
 author: "Covid_p11"
 date: '2022-05-25'
-output: html_document
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    self_contained: yes
+    theme: flatly
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    code_folding: hide
 ---
 
-```{r}
+# Executive Summary
 
-```
 
+
+# Backgrounds
+
+
+
+# Approach & Method
+
+
+
+# Results
+
+
+
+
+# Discussion
+
+
+
+# Conclusion
+
+
+
+# Group Contribution
