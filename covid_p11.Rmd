@@ -352,19 +352,21 @@ Prices_joined$Change.. <- as.numeric(gsub("%","",Prices_joined$Change..))
 
 # classifying
 MLdata <- Prices_joined %>% mutate(level = case_when((Prices_joined$Change.. <= 0.00) ~ "Low", (Prices_joined$Change.. > 0.00) ~ "High"))
-MLdata <- dplyr::select(MLdata,Date,level,Price,new_vaccinations,new_cases,new_tests) %>% na.omit()
+MLdata
+
+MLdata_filtered <- dplyr::select(MLdata,Date,level,Price,new_vaccinations,new_cases,new_tests) %>% na.omit()
 
 # making sure its named Price so that if we select another variable in the shiny app which is called something different it can be changed to Price as the name
-colnames(MLdata)[3] == "Price"
+colnames(MLdata_filtered)[3] == "Price"
 
-MLdata$level <- as.factor(MLdata$level)
+MLdata_filtered$level <- as.factor(MLdata_filtered$level)
 
 
 # normalizing
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x))) }
-Norm_MLdata <- as.data.frame(lapply(MLdata[3:5], normalize)) 
-Norm_MLdata <- cbind(Norm_MLdata, MLdata[c("level", "Date")])
+Norm_MLdata <- as.data.frame(lapply(MLdata_filtered[3:5], normalize)) 
+Norm_MLdata <- cbind(Norm_MLdata, MLdata_filtered[c("level", "Date")])
 
 # creating 80/20 split
 trainIndex <- createDataPartition(Norm_MLdata$level, p = 0.8, list = FALSE)
