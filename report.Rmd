@@ -17,6 +17,79 @@ output:
     toc_depth: '3'
 ---
 
+```{r setup, include=FALSE}
+# Data input and processing
+options(htmltools.dir.version = FALSE)
+
+library(tidyverse)
+library(ggplot2)
+library(maps)
+library(plotly)
+library(caret)
+library(dplyr)
+library(lubridate)
+library(scales)
+library(magrittr)
+library(tidyr)
+library(pkr)
+library(plotly)
+library(ggthemes)
+library(tseries)
+library(quantmod)
+library(roll)
+library(plotly)
+library(gganimate)
+library(tidyquant)
+library(caret)
+library(klaR)
+library(zoo)
+library(patchwork)
+
+covid = read.csv("owid-covid-data.csv")
+sp500 = read.csv("SPY Historical Data.csv", fileEncoding = 'UTF-8-BOM')
+TOPIX = read.csv("TOPIX Historical Data.csv", fileEncoding = 'UTF-8-BOM')
+ASX200 = read.csv("S&P_ASX 200 Historical Data.csv", fileEncoding = 'UTF-8-BOM')
+NSEI = read.csv("Nifty 50 Historical Data.csv", fileEncoding = 'UTF-8-BOM') 
+SSEC = read.csv("Shanghai Composite Historical Data.csv", fileEncoding = 'UTF-8-BOM') 
+covid2 <- covid
+covid2$date = as.character(ymd(covid2$date))
+sp500$Date <- as.character(mdy(sp500$Date))
+TOPIX$Date <- as.character(mdy(TOPIX$Date))
+ASX200$Date <- as.character(mdy(ASX200$Date))
+NSEI$Date <- as.character(mdy(NSEI$Date))
+SSEC$Date <- as.character(mdy(SSEC$Date))
+
+colnames(covid2)[4] = "Date"
+
+covid_US <- covid2 %>% filter(location == "United States")
+covid_AUS <- covid2 %>% filter(location == "Australia")
+covid_IND <- covid2 %>% filter(location == "India")
+covid_JPN <- covid2 %>% filter(location == "Japan")
+covid_CHN <- covid2 %>% filter(location == "China")
+
+df_1 = inner_join(sp500, covid_US, by = "Date")
+df_2 = inner_join(TOPIX, covid_JPN, by = "Date")
+df_3 = inner_join(ASX200, covid_AUS, by = "Date")
+df_4 = inner_join(NSEI, covid_IND, by = "Date")
+df_5 = inner_join(SSEC, covid_CHN, by = "Date")
+
+covid_joined <- rbind(df_1, df_2, df_3, df_4, df_5)
+
+covid_joined$Date <- ymd(covid_joined$Date)
+covid_joined$Price <- as.numeric(gsub(",","",covid_joined$Price))
+covid_joined$Open <- as.numeric(gsub(",","",covid_joined$Open))
+covid_joined$High <- as.numeric(gsub(",","",covid_joined$High))
+covid_joined$Low <- as.numeric(gsub(",","",covid_joined$Low))
+covid_joined$Change.. <- as.numeric(gsub("%","",covid_joined$Change..))
+
+covid_joined <- covid_joined %>% 
+  filter(Date >= "2020-03-11") %>%
+  mutate(Year_category = case_when( 
+    Date >= "2020-03-11" & Date < "2021-01-01" ~ "1st year", 
+    Date >= "2021-01-01" & Date < "2022-01-01" ~ "2nd year", 
+    Date >= "2022-01-01" & Date < "2023-01-01" ~ "3rd year (ongoing)"))
+```
+
 # Executive Summary
 
 ## Short Description
@@ -34,8 +107,120 @@ A hypothesis formulated by (Diermier, Ibbotson, & Siegel, 1984; Ibbotson & Chen,
 
 
 # Approach & Method
+## Data collection & Preprocessing
+```{r, include=FALSE}
+covid_joined <- covid_joined %>% 
+  filter(Date >= "2020-03-11") %>%
+  mutate(Year_category = case_when( 
+    Date >= "2020-03-11" & Date < "2021-01-01" ~ "1st year", 
+    Date >= "2021-01-01" & Date < "2022-01-01" ~ "2nd year", 
+    Date >= "2022-01-01" & Date < "2023-01-01" ~ "3rd year (ongoing)"))
+
+fig <- plot_ly(covid_joined, x = ~Change.., y = ~location, color = ~Year_category, type = "box") %>% layout(boxmode = "group",
+         xaxis = list(showgrid = TRUE),
+         yaxis = list(showgrid = TRUE))
+
+fig <- fig %>% layout(xaxis = list(title = 'daily gain/loss (%)'))
+```
 
 
+```{r, warning=FALSE, fig.height=5.5, fig.width=10, echo=FALSE}
+fig
+```
+
+## Correlation matrix
+
+We are interested in 4 variables: Price (the price of the equity market), new_vaccinations(number of people getting vaccinated everyday), new_tests(number of people who did tests everyday) and new_cases(number of new cases everyday). We selected these variables as they were present in our 5 interested countries which made them suitable for analysis. So a correlation matrix of those 4 variables is made to explore the possible correlations of them as below.
+
+```{r, include=FALSE}
+df_q2 = covid_joined
+colnames(df_q2)[7] = 'Change'
+write.csv(df_q2,"df_q2.csv")
+
+df_q2 = as.data.frame(df_q2[order(df_q2$Date),]) %>% drop_na(new_vaccinations, new_tests, new_cases, Price)
+df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Price)
+```
+
+```{r}
+M=cor(df_q2_cor)
+#qtlcharts::iplotCorr(df_q2_cor)
+
+library(corrplot)
+corrplot(M, method="circle")
+```
+
+It’s clear that there is a relatively strong correlation between Price and new_vaccinations, and new_cases and new_tests. 
+So we focus on those 2 pairs of variables furthermore. After trying linear and polynomial regression models, we found none of them fit to those variables well. So we then became interested in the trend of correlation over the time. By grouping the data set by each month and then calculating the correlation of Price and new_vaccinations, and new_cases and new_tests respectively, we got the plot below showing the trend of correlations of those variables over the epidemic time period.
+
+```{r, include=FALSE}
+df_q2_date = df_q2 %>% group_by(Date) %>% summarize(avg_price = mean(Price), avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
+
+nrow_df_q2 = 360
+i = 1
+cor1 <- list()
+time_ls <- list()
+j = 1
+while (i <= nrow_df_q2) {
+  subset <- df_q2_date[i:(i+29),]
+  cor1[[j]] <- cor.test(subset$avg_price,subset$avg_new_vac, method = "pearson")
+  time_ls[[j]] = subset$Date[1]
+  print(time_ls[[j]])
+  j = j + 1
+  i = i + 30
+}
+out <- lapply(cor1, function(x) c(x$estimate, x$conf.int, x$p.value))
+D1 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
+names(D1)[2:ncol(D1)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
+#D1
+
+i = 1
+cor2 <- list()
+j = 1
+while (i <= nrow_df_q2) {
+  subset <- df_q2_date[i:(i+29),]
+  cor2[[j]] <- cor.test(subset$avg_new_tests,subset$avg_new_cases, method = "pearson")
+  j = j + 1
+  i = i + 30
+}
+out <- lapply(cor2, function(x) c(x$estimate, x$conf.int, x$p.value))
+D2 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
+names(D2)[2:ncol(D2)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
+df_q2_date = as.data.frame(time_ls)
+df_q2_date = as.data.frame(t(df_q2_date))
+#df_q2_date
+
+colnames(D1)[1] ="start_date"
+colnames(D1)[2] ="avg_price_avg_new_vacc"
+colnames(D1)[3] ="avg_new_tests_avg_new_cases"
+#,"avg_price_avg_new_vacc","avg_new_tests_avg_new_cases"
+df_q2_cor_time = D1 %>% mutate(start_date = df_q2_date$V1, avg_new_tests_avg_new_cases = D2$estimate)
+#cor_df_time
+df_q2_cor_time$start_date = as.Date(df_q2_cor_time$start_date)
+df_q2_cor_time = df_q2_cor_time[ , -which(names(df_q2_cor_time) %in% c("conf.int2","p.value"))]
+#df_q2_cor_time
+```
+
+```{r, include=FALSE}
+p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_new_tests_avg_new_cases, colour = "avg new_tests ~ avg new_cases"), size = 0.8) +
+  geom_line(aes(y=avg_price_avg_new_vacc, colour = 'avg price ~ avg new_vacc'), size = 0.8) +
+  scale_colour_manual("", 
+                      values = c("avg new_tests ~ avg new_cases"="#FF00CC", "avg price ~ avg new_vacc"="#3333FF")) +
+  ggtitle("Price~New_vaccinations, New_tests~New_cases") + xlab("Date") +
+  ylab("Coorelation")+
+  #scale_fill_manual(values = c("light green", "yellow"))+
+  theme_bw()
+```
+
+```{r, fig.height=6, fig.width=10}
+ggplotly(p1)
+```
+
+A decrease in trend for the pink line (i.e. the correlation of average new tests and average new cases of each month) appears on the plot. This possibly is as a result of reduced testing as the pandemic progressed whilst the number of cases remained steady or increased, causing correlation between the 2 variables to decline. Furthermore, the blue line, depicting average new vaccinations and price, starts to show a relatively steady trend towards August of 2021. We inferred that the trend might correspond to vaccination rates rising which allowed the return of normal living, thus influencing the equity markets to also return to a steady pattern.
+To analyze how the equity market behaved integrally during the epidemic period, we made a machine learning model. The process of making models, further analyzing and evaluation of models will be stated specifically below. 
+
+## Develop model
+
+2333
 
 # Results
 

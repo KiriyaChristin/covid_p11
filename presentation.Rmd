@@ -199,8 +199,11 @@ df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Pric
 ```
 
 ```{r}
-cor(df_q2_cor)
+M=cor(df_q2_cor)
 qtlcharts::iplotCorr(df_q2_cor)
+
+library(corrplot)
+corrplot(M, method="circle")
 ```
 
 ---
