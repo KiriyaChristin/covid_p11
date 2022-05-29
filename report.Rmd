@@ -19,6 +19,11 @@ output:
 
 # Executive Summary
 
+## Short Description
+
+## Main findings
+
+## Relevance of analysis
 
 
 # Backgrounds
