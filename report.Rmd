@@ -96,6 +96,8 @@ covid_joined <- covid_joined %>%
 
 ## Main findings
 
+## Key figure
+
 ## Relevance of analysis
 
 
