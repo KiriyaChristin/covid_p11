@@ -136,9 +136,7 @@ fig
 
 ## Correlation matrix
 
-We are interested in 4 variables: Price (the price of the equity market), new_vaccinations(number of people getting vaccinated everyday), new_tests(number of people who did tests everyday) and new_cases(number of new cases everyday). We selected these variables as they were present in our 5 interested countries which made them suitable for analysis. So a correlation matrix of those 4 variables is made to explore the possible correlations of them as below.
-
-```{r, include=FALSE}
+```{r}
 df_q2 = covid_joined
 colnames(df_q2)[7] = 'Change'
 write.csv(df_q2,"df_q2.csv")
@@ -146,6 +144,8 @@ write.csv(df_q2,"df_q2.csv")
 df_q2 = as.data.frame(df_q2[order(df_q2$Date),]) %>% drop_na(new_vaccinations, new_tests, new_cases, Price)
 df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Price)
 ```
+
+We are interested in 4 variables: Price (the price of the equity market), new_vaccinations(number of people getting vaccinated everyday), new_tests(number of people who did tests everyday) and new_cases(number of new cases everyday). We selected these variables as they were present in our 5 interested countries which made them suitable for analysis. So a correlation matrix of those 4 variables is made to explore the possible correlations of them as below.
 
 ```{r}
 M=cor(df_q2_cor)
@@ -155,10 +155,10 @@ library(corrplot)
 corrplot(M, method="circle")
 ```
 
-There is a relatively strong correlation between Price and new_vaccinations, and new_cases and new_tests. 
-So we focused on those 2 pairs of variables. After trying linear and polynomial regression models, we found none of them fit well to those variables. So we then became interested in the trend of correlation over the time. By grouping the data set by month and then calculating the correlation of Price and new_vaccinations, and new_cases and new_tests respectively, we produced the plot below depicting the trend of correlations of those variables over the epidemic time period.
+It’s clear that there is a  correlation between Price and new_vaccinations, and new_cases and new_tests. 
+So we focus on those 2 pairs of variables furthermore.I make a 1 month rolling window and then calculating the correlation of Price and new_vaccinations, and new_cases and new_tests respectively, we got the plot below showing the trend of correlations of those variables over the epidemic time period.===
 
-```{r, include=FALSE}
+```{r}
 df_q2_date = df_q2 %>% group_by(Date) %>% summarize(avg_price = mean(Price), avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
 
 nrow_df_q2 = 360
@@ -170,7 +170,6 @@ while (i <= nrow_df_q2) {
   subset <- df_q2_date[i:(i+29),]
   cor1[[j]] <- cor.test(subset$avg_price,subset$avg_new_vac, method = "pearson")
   time_ls[[j]] = subset$Date[1]
-  print(time_ls[[j]])
   j = j + 1
   i = i + 30
 }
@@ -206,7 +205,7 @@ df_q2_cor_time = df_q2_cor_time[ , -which(names(df_q2_cor_time) %in% c("conf.int
 #df_q2_cor_time
 ```
 
-```{r, include=FALSE}
+```{r}
 p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_new_tests_avg_new_cases, colour = "avg new_tests ~ avg new_cases"), size = 0.8) +
   geom_line(aes(y=avg_price_avg_new_vacc, colour = 'avg price ~ avg new_vacc'), size = 0.8) +
   scale_colour_manual("", 
