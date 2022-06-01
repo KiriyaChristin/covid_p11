@@ -308,13 +308,13 @@ The rules based algorithm involves pairing a slow exponential moving average and
 
 Our report model has used these as our default settings
 
-- slow moving average - 100 (days)
+- Slow moving average - 100 (days)
 
-- fast moving average - 50 (days)
+- Fast moving average - 50 (days)
 
-- portfolio risk - 1 (corresponding to 100%)
+- Portfolio risk - 1 (corresponding to 100%)
 
-- asset/index - S&P 500 index
+- Asset/index - S&P 500 index
 
 
 ```{r, echo=FALSE, warning=FALSE}
