@@ -2,11 +2,11 @@
 title: "Data3888 project report"
 author: "Covid_p11"
 date: '2022-05-25'
-subtitle: 'Github: https://github.com/KiriyaChristin/covid_p11 | Shiny App: http://jzha3620.shinyapps.io/Model'
+subtitle: 'Github: https://github.com/KiriyaChristin/covid_p11.git | Shiny App: http://jzha3620.shinyapps.io/Model'
 output:
   html_document:
     fig_caption: yes
-    number_sections: yes
+    number_sections: no
     self_contained: yes
     theme: flatly
     toc: yes
@@ -365,32 +365,32 @@ Our Shiny app consists of 5 sections, the first section containing a brief overv
 
 # Discussion of Results & Limitations
 
-# Phase 1 
+## Phase 1 
 Our examination of Covid data in the context of a financial based analysis has yielded interesting results. Primarily, our initial analysis in section 1 concluded significant reactionary behavior in the stock market from the excessive kurtosis in the boxplots. Excessive kurtosis refers to the extremity of the tails considering the aggressiveness of the outliers which suggests thicker tails compared to a typical normal distribution. Furthermore we noticed that there was also recovery evident with stabilization among the second and third years shifting the behavior of the stock market. These findings are highly consistent with covid crisis and represents the shift in behavior in the stock market. This initial analysis is vital in forming the basis of our hypothesis that the stock market is influenced by covid related factors.
 
-# Phase 2
+## Phase 2
 The first correlation model explored whether US based vaccine manufacturers were anomalous during covid showed promising findings. We selected the US as it displayed aggressive behavior from phase 1 and also among the most traded indices in the world allowing for an effective analysis (). From the 150 day window, the three most uncorrelated assets were vaccine manufacturers which all reached a negative correlation at one point in time and also were the only assets to do so. Interestingly, Pfizer's behavior significantly altered over time as it slowly decreased in correlation as the pandemic progressed. All assets displayed some sort of a hit with a general decreasing trend to the overall market. Ultimately, these findings indicate that there are significant effects on assets particularly for vaccine manufacturers due to covid related factors. This again shows evidence for a significant type of reactionary behavior that we have seen within an isolated analysis particularly in the US. 
  
 The second question explores correlation modeling of these variables with our correlation matrix highlighting no clear way of defining an immediate price relationship even though a reactionary behavior in the stock market during covid can be observed. This is with the exception of vaccines and price which feature moderate correlation highlighting that the vaccine rollout was potentially aligned with market recovery. This is possible due to vaccine rollout consequently resulting in economic influx with lifted lockdowns. A study in the International Journal of Financial Analysis revealed a 0.2271% drop in stock market volatility after vaccine rollouts. Furthermore, in countries with consistent vaccination rates, stock market volatility was further reduced by 0.2041% (Rouatbi,2021). which supports the argument that the rollout of vaccines uplifted psychological factors in investors resulting in increased investor motivation.
 
-# Phase 3
+## Phase 3
 It is important to note that for the purpose of this report, the finalized algorithm was run on the S&P 500 index which would typically be bought through its respective ETF. Additionally, as mentioned earlier, the Shiny app developed for our client allows experimentation with a variety of US based stocks, but this report focuses only on the S&P500 using default settings for the algorithm.
 
 It is also vital to justify the accuracy of the machine learning model. Primarily, the accuracies from the model were suboptimal, however, our team has given lenience to this considering that generally it is very difficult to effectively predict the stock market with even 60+ percent being a usable model. The KNN model will form the basis of the machine learning side of the algorithm and will be one part of a larger algorithm that will be utilized for trading the market. The reason why a pure machine learning model on its own is not useful is because it exhibits a plethora of limitations making it difficult to implement with success. One of these limitations include that a machine learning model on its own, avoids many general trading heuristics (such as executing a long trade in a downtrend), and due to having a small training set and simple underlying build, is still very rough and far from an institutional level algorithm which has a depth of optimisation. Furthermore, a machine learning model on its own simply estimates a classifier for either a positive or negative day and is not practical algorithmically on its own as it does not actually account for set parameters regarding entry, exits, portfolio size risk and such.
 
 For this reason our team decided to build a working stock trading algorithm based on fast exponential moving average crossovers which would then consult and take advice from the machine learning model in terms of executing a finalized trade. Therefore this strategy aims to utilize the machine learning model as a type of exotic indicator which adds confirmation to a trade. This also highlights one of the key creative innovations that our team has demonstrated throughout the project which looks at utilizing an exotic machine learning based model built from covid data to assist a rule based algorithm to create our final algorithmic trading model. Its performance varies depending on parameters and asset, but for the S&P 500 under default settings it has generated a worthy 21.9% return on investment, however, it has endured some serious drawdown over 2022 of 12.9% percent at its peak. This indicates the model may have long term performance issues, though, the 2022 market has been in a downtrend indicating general trading difficulty for most traders. Ultimately this highlights that covid data can be used in conjunction with an algorithm, however, it is important to realize that this model comes with a plethora of limitations which needs to be recognised.
 
-# limitations
+## limitations
 During the process of finding correlations between our interested variables, we realized that there are too many biases behind covid variables. It’s hard to make a linear or polynomial model, therefore, we focus on the correlation between variables over epidemic periods and then use KNN, RPART and RDA algorithms to do machine learning.
 It should be noted that the machine learning aspect of the model underperformed to our intended expectations given the efficacy and size of the underlying training data. Furthermore, it is vital to understand that Covid is a situation that is rapidly evolving and highly unpredictable. Due to this, the model is potentially training on old types of markets which have already shifted in behavior when the model is practically applied. Potential mitigations to this include retraining the model to recalculate its assessment of positions over time. In addition to this, slippage and commission (addition parameters when practically trading a market) have not been factored into the algorithm due to its extensive coding requirements and variance among brokers. Finally, historical performance in no way guarantees future performance meaning that this highly unique market may not uphold and future performance may drastically vary.
 
-# Future applications
+## Future applications
 Improvements to the KNN algorithm can include feature selection to improve accuracy (Benbouziane 2022) This may include specific data on Vaccination and death rate of the Vaccinated, or new cases in vaccinated populations. Applying the feature selection process will consist of  removing the less important  features from  the dataset  and  identifying  the variables  that  most contribute  to the prediction of our target variable to  reduce overfitting problems and achieve a better  prediction accuracy.
 
 # Conclusion
 Our group combines covid data and Stock Quotes data to analyze the effects of Covid-19 on relevant public equity markets. We have found the prices of equity markets are closely related to this global pandemic by collecting the information from leading countries (Australia, Japan, India, USA and China) and analyzing it via the correlation matrices. We obtain the daily stock prices for 15 kinds of stocks from USA stock market, which is universally-acknowledged as a typical one, through a financial database from yahoo, and selected 4 variables (Price, new_vaccinations, new_testsand new_cases) and using the trading algorithm, then using machine learning models(KNN,PDA,RPART) to make a prediction. We also developed a shiny app as a guide for retail traders and investors. As a result, the users can have a clear understanding of the impact of Covid-19 on the stock market, based on which they can make wiser investment decisions.
 
-# Group contributions
+# Student contributions
 
 Group contributions were divided into 3 sections. Section 1 included data cleaning and acquisition as well as basic data visualization which included box plots depicting the gains and losses of each stock market done by Maxim. Section 2 included analyses of data to find correlations including using linear/polynomial regression, and creating correlation matrices and graphs in which only the later were used. This was done by Christin(Ruoshui) and Jasmine. Section 3 was modeling and machine learning algorithms KNN, RPART and RDA. This was completed by Marin(Zhe), Paul(Shihan) and Maxim. Contributions to the shiny app with Jinting coding the Shiny app and Marin, Paul, Maxim and Jasmine contributing information and research for the website. Oral presentation was conducted by Maxim, Jasmine, Jia and Jinting, with slide creation and editing done by Christin, Paul, Marin and Maxim. Report had full group contribution; discussions and editing from Maxim, Introductions/backgrounds, referencing, and editing from Jasmine, Executive summary by Jia, correlation analysis and result by Christin, model development and research by Paul and Marin, Machine learning model and algorithm done by Jinting and Marin and lastly conclusion written by Marin. 
 
