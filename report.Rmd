@@ -2,12 +2,14 @@
 title: "Data3888 project report"
 author: "Covid_p11"
 date: '2022-05-25'
+subtitle: 'Github: https://github.com/KiriyaChristin/covid_p11 | Shiny App: http://jzha3620.shinyapps.io/Model
+'
 output:
   html_document:
     fig_caption: yes
     number_sections: yes
     self_contained: yes
-    theme: flatly
+    theme: yeti
     toc: yes
     toc_depth: 3
     toc_float: yes
@@ -17,7 +19,7 @@ output:
     toc_depth: '3'
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning=FALSE}
 # Data input and processing
 options(htmltools.dir.version = FALSE)
 
@@ -91,30 +93,26 @@ covid_joined <- covid_joined %>%
 ```
 
 # Executive Summary
-The project aims to analyze the correlation between covid and stock data to build relative models to predict their future direction through historical data.Through this analysis and the shiny app we developed, in the future,the investments will become even higher efficiency and safer.Laying a solid foundation for global economic recovery.
-We tried to analyze existing historical data on the covid-19 epidemic and stocks and find relevant relationships to create a machine learning model to act as a potential trading indicator which would ultimately supplement an existing trading algorithm at predicting future performance of stocks. This aims to provide advice on buying stocks with upside potential and suggest suitable times to buy or sell. We believe that if we can successfully predict the future trend of each country's stocks, it can help the investor to reduce the enormous economic losses caused by the epidemic to a great extent and make more money. Through our research, we found that the volatility of the daily stock prices is closely related to the data of the epidemic.
-
-## Short Description
-
-## Main findings
-
-## Key figure
-
-## Relevance of analysis
+The Covid 19 pandemic has had a large-scale impact and shock on the economies of various countries. According to research The GDP of 30 different countries he studied dropped by an average of 2.8% (N. Fernandez，2020). Stock market volatility is often closely related to the country's economic performance, thus stock markets of various countries have experienced severe turbulence from the Covid 19 pandemic which has had a significant impact on investors losing their stocks.
 
 
-# Backgrounds
+This report aims to analyze the correlation between Covid and Stock market data to build relative models and predict their future direction using historical data. Through this analysis and the Shiny app we developed, in the future, investments can be conducted with lower risks and  higher efficiency thus laying a solid foundation for global economic recovery.This aims to provide advice on buying stocks with upside potential. We believe that if we can successfully predict the future trend of each country's stocks, it can help investors recover from their economic losses from the Pandemic.
 
+# Background
 The global spread of SARS-COV2 (Covid-19) in the beginning of 2020 resulted in millions of deaths and ICU hospitalisations worldwide. The economy was severely impacted by this pandemic and as a result, public equity markets of leading countries (Australia, Japan, India, USA and China). Most equity markets reached a peak in February 2019, and dipped around March 23 as a majority of the world’s largest economy were forced into lockdown. (Seven & Yilmaz 2021) This report evaluates the impact of Covid-19 on global equity markets and provides a guide for retail traders and investors. Using data collected from owid-covid-data , Investing.com for indices, and yahoo finance for US companies. We conducted basic linear regressions and correlation matrices as analysis for the modeling on a user Shiny app to better communicate the effects of Covid-19 on relevant public equity markets. We used various modeling algorithms (KNN, RDA, RPART) in combination with existing trading algorithms as an attempt to predict the accuracies in trends between interested variables relating to Covid and the prices of equity markets to highlight any relevant relationships between the two data. 
 
-A hypothesis formulated by (Diermier, Ibbotson, & Siegel, 1984; Ibbotson & Chen, 2003) states that a stock market’s success is reliant on the success of businesses. With lockdown and strict social distancing laws in place globally, business and trade were impacted and called to a halt. These series of events layed path for negative returns, greater volatility, and higher trading volume in the global equity market (Harjoto 2021) As there are no current studies to report on the effect of stock markets and daily cases and mortality rates, through this report we aim to make preliminary findings and identify variables which are responsible for changes in equity markets and relate them to the current Covid-19 crisis to identify how this virus has caused instability in stock
+A hypothesis formulated by (Diermier, Ibbotson, & Siegel, 1984; Ibbotson & Chen, 2003) states that a stock market’s success is reliant on the success of businesses. With lockdown and strict social distancing laws in place globally, business and trade were impacted and called to a halt. These series of events layed path for negative returns, greater volatility, and higher trading volume in the global equity market (Harjoto 2021) As there are no current studies to report on the effect of stock markets and daily cases and mortality rates, through this report we aim to make preliminary findings and identify variables which are responsible for changes in equity markets and relate them to the current Covid-19 crisis to identify how this virus has caused instability in stocks.
 
+## Pre-processing
+Our ultimate goal with the preprocessing stage was to create a finalized joint data set with respective country indices connected to the Covid data set. We primarily performed a variety of data splitting to enforce uniqueness of the ‘date’ variable where we would join respective country indices with data as an ID, eventually binding this and creating our finalized Covid joined data set. Transformation for variables was applied throughout to create workable formats whilst NA’s were efficiently eliminated to enforce uniqueness. Finally, depending on the section, log returns were calculated with logs on the already provided returns variable (Change..). US company data was utilized in isolation with the exception of Section 3 where this was also joined with our covid data but in a very specific manner. The scraped data was fairly clean meaning only log returns had to be calculated for their respective companies. Details regarding the granular preprocessing steps are provided in the comments of the respective code sections.
 
+## Phase 1: Exploratory analysis of stock indices during COVID-19
 
+Note that results and Phase 1 analysis along with the other phases will be discussed in the discussion section using this part simply to interpret the descriptive underlying build of the models.
 
-# Approach & Method
-## Data collection & Preprocessing
-```{r, include=FALSE}
+For this section, our team was interested in performing an analysis on the reactionary behavior of the stock market during the pandemic and more importantly examine whether this behavior changed overtime. This section involved plotting the returns of each index grouped by the years for each selected country. It is important to mention that the first year data was filtered to start from March 11, 2020 (the declaration of the pandemic from the WHO), and the third year data is currently still ongoing.
+
+```{r, include=FALSE, warning=FALSE}
 covid_joined <- covid_joined %>% 
   filter(Date >= "2020-03-11") %>%
   mutate(Year_category = case_when( 
@@ -130,122 +128,281 @@ fig <- fig %>% layout(xaxis = list(title = 'daily gain/loss (%)'))
 ```
 
 
-```{r, warning=FALSE, fig.height=5.5, fig.width=10, echo=FALSE}
+```{r, include=FALSE, warning=FALSE}
 fig
 ```
 
-## Correlation matrix
 
-```{r}
+## Phase 2: Correlation modeling 
+
+### Analysis 1: correlation modeling for US companies
+
+Firstly we looked at taking a deeper analysis particularly into the US in order to closer analyze its behavior and determine whether vaccine manufacturers exhibited anomalous behavior during covid. This plot focuses on plotting assets along with US based vaccine manufacturers and their computed correlation to the US based index which is the S&P500. This correlation was produced as a rolling correlation which is understood as calculating a correlation within a certain window size, and sliding the window across to attain a dynamically changing correlation value. Our tests revelaed that a 150 day window was the most optimal size which allowed rapid changes in correlation values, however, not enough to cause aggressive volatility that would clutter the graph. This window is changeable within the associated shiny app version. Finally, given the quantity of companies plotted, we recommend taking advantage of the associated plotly features to isolate respective companies.
+
+```{r, include=FALSE, warning=FALSE}
+# will need to probably write a function for this later as at the moment i am just hard coding this
+
+mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','V','FB','PFE','MRNA')
+myStocks <-lapply(mySymbols, function(x) {getSymbols(x, src = "yahoo", 
+                                                     from = "2020-01-01", 
+                                                     to = "2022-04-04",
+                                                     periodicity = "daily",
+                                                     auto.assign=FALSE)} )
+
+close <- lapply(myStocks, Cl)
+close <- as.data.frame(do.call(merge, close))
+close <- na.omit(log(close/lag(close)))
+close <- rownames_to_column(close, "Date")
+
+date <- close["Date"]
+
+widnow_size <- 150
+
+corr_AMZN <- as.data.frame(roll_cor(close$AMZN.Close, close$GSPC.Close, width = widnow_size)) %>% cbind(date) %>% na.omit
+corr_AMZN$symbol <- "AMZN"
+colnames(corr_AMZN)[1] = "corr"
+
+corr_NFLX <- as.data.frame(roll_cor(close$NFLX.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_NFLX$symbol <- "NFLX"
+colnames(corr_NFLX)[1] = "corr"
+
+corr_MSFT <- as.data.frame(roll_cor(close$MSFT.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_MSFT$symbol <- "MSFT"
+colnames(corr_MSFT)[1] = "corr"
+
+corr_GOOG <- as.data.frame(roll_cor(close$GOOG.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_GOOG$symbol <- "GOOG"
+colnames(corr_GOOG)[1] = "corr"
+
+corr_NVAX <- as.data.frame(roll_cor(close$NVAX.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_NVAX$symbol <- "NVAX"
+colnames(corr_NVAX)[1] = "corr"
+
+corr_V <- as.data.frame(roll_cor(close$V.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_V$symbol <- "VISA"
+colnames(corr_V)[1] = "corr"
+
+corr_FB <- as.data.frame(roll_cor(close$FB.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_FB$symbol <- "FB"
+colnames(corr_FB)[1] = "corr"
+
+corr_PFE <- as.data.frame(roll_cor(close$PFE.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_PFE$symbol <- "PFE"
+colnames(corr_PFE)[1] = "corr"
+
+corr_MRNA <- as.data.frame(roll_cor(close$MRNA.Close, close$GSPC.Close, width = widnow_size))%>% cbind(date) %>% na.omit
+corr_MRNA$symbol <- "MRNA"
+colnames(corr_MRNA)[1] = "corr"
+
+corr_joined = rbind(corr_AMZN, corr_NFLX, corr_GOOG, corr_NVAX, corr_V, corr_FB, corr_MSFT, corr_PFE, corr_MRNA)
+
+corr_joined$Date <- as.Date(corr_joined$Date)
+
+p = ggplot(corr_joined, aes(x=Date, y=corr, colour = symbol)) + geom_line() + labs(x = "Date", y = "rolling correlation (150D period)") + ggtitle("examining correlation of vaccine macufacturers compared to typical stocks") + theme_clean()
+
+ggplotly(p)
+```
+
+### Analysis 2: correlation matrix
+We are primarily interested in 4 key variables which are evident below that will be able to give us insight into any potential relationships with the market. We selected these variables as they were present in our 5 interested countries which made them suitable for analysis. A correlation matrix of these variables is made to explore the possible correlations of them as evident below.
+
+```{r, include=FALSE, warning=FALSE}
 df_q2 = covid_joined
 colnames(df_q2)[7] = 'Change'
 write.csv(df_q2,"df_q2.csv")
 
 df_q2 = as.data.frame(df_q2[order(df_q2$Date),]) %>% drop_na(new_vaccinations, new_tests, new_cases, Price)
 df_q2_cor = df_q2 %>% dplyr::select(new_vaccinations, new_tests, new_cases, Price)
-```
 
-We are interested in 4 variables: Price (the price of the equity market), new_vaccinations(number of people getting vaccinated everyday), new_tests(number of people who did tests everyday) and new_cases(number of new cases everyday). We selected these variables as they were present in our 5 interested countries which made them suitable for analysis. So a correlation matrix of those 4 variables is made to explore the possible correlations of them as below.
-
-```{r}
 M=cor(df_q2_cor)
 #qtlcharts::iplotCorr(df_q2_cor)
 
 library(corrplot)
+```
+
+```{r, include=FALSE, warning=FALSE}
 corrplot(M, method="circle")
+par(mfrow=c(1,2))    # set the plotting area into a 1*2 array
 ```
 
-It’s clear that there is a  correlation between Price and new_vaccinations, and new_cases and new_tests. 
-So we focus on those 2 pairs of variables furthermore.I make a 1 month rolling window and then calculating the correlation of Price and new_vaccinations, and new_cases and new_tests respectively, we got the plot below showing the trend of correlations of those variables over the epidemic time period.===
+## Model Development 
+The model development consists of 2 parts, creating the machine learning model, and then creating an associated trading algorithm which will be utilized in conjunction with the model. In regards to our final model, this report focuses on the results of its application specifically to trading the US S&P 500 index. That being said, we selected stock prices from several leading stocks in the US market such as ‘AMZN’, ‘NFLX’, along with US based vaccine manufacturers which can be tested within the shiny app. 
 
-```{r}
-df_q2_date = df_q2 %>% group_by(Date) %>% summarize(avg_price = mean(Price), avg_new_cases = mean(new_cases), avg_new_tests = mean(new_tests), avg_new_vac = mean(new_vaccinations))
+### Machine Learning Model
+We created a new column called ‘level’ to measure the level of stock prices and set the classifying rule so that if the daily return (daily percentage change in price) is lower than 0, it will be classified as ‘low’, otherwise it will be classified as ‘high’. We selected 3 variables for predicting the classified level in the model which are new_vaccinations, new_tests, and new_cases. Moreover, Deploying a normalization function among our variables was a necessary preprocessing step to reduce any distortions in differences between the ranges of values in our data set. Three different classifiers knn, rda and rpart were used to assess the  performance of selected variables. The dependent variable depicted included the level of stock price while independent variables were ‘new covid cases’ and ‘new vaccinations’.
 
-nrow_df_q2 = 360
-i = 1
-cor1 <- list()
-time_ls <- list()
-j = 1
-while (i <= nrow_df_q2) {
-  subset <- df_q2_date[i:(i+29),]
-  cor1[[j]] <- cor.test(subset$avg_price,subset$avg_new_vac, method = "pearson")
-  time_ls[[j]] = subset$Date[1]
-  j = j + 1
-  i = i + 30
-}
-out <- lapply(cor1, function(x) c(x$estimate, x$conf.int, x$p.value))
-D1 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
-names(D1)[2:ncol(D1)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
-#D1
+```{r, include=FALSE, warning=FALSE}
+set.seed(1)
+# will be using this later as ideally with the shiny app we can pick and predict a particlar stock
+mySymbols <- c('AMZN', '^GSPC','NFLX','MSFT','GOOG','NVAX','DIS','WMT','COST','V','FB','AXP','CMCSA','PFE','MRNA')
+myStocks <-lapply(mySymbols, function(x) {getSymbols(x, src = "yahoo", 
+                                                     from = "2020-01-01", 
+                                                     to = "2022-04-04",
+                                                     periodicity = "daily",
+                                                     auto.assign=FALSE)} )
 
-i = 1
-cor2 <- list()
-j = 1
-while (i <= nrow_df_q2) {
-  subset <- df_q2_date[i:(i+29),]
-  cor2[[j]] <- cor.test(subset$avg_new_tests,subset$avg_new_cases, method = "pearson")
-  j = j + 1
-  i = i + 30
-}
-out <- lapply(cor2, function(x) c(x$estimate, x$conf.int, x$p.value))
-D2 <- data.frame(cbind(index = seq(length(out)), do.call(rbind, out)))
-names(D2)[2:ncol(D2)] <- c('estimate', paste0('conf.int', 1:2), 'p.value')
-df_q2_date = as.data.frame(time_ls)
-df_q2_date = as.data.frame(t(df_q2_date))
-#df_q2_date
+# cleaning, wrangling, transforming, joining section for algo
+Prices <- lapply(myStocks, Cl)
+Prices <- as.data.frame(do.call(merge, Prices))
+Prices <- rownames_to_column(Prices, "Date")
+US_data <- df_1
+Prices_joined <- inner_join(US_data,Prices)
+Prices_joined$Change.. <- as.numeric(gsub("%","",Prices_joined$Change..))
 
-colnames(D1)[1] ="start_date"
-colnames(D1)[2] ="avg_price_avg_new_vacc"
-colnames(D1)[3] ="avg_new_tests_avg_new_cases"
-#,"avg_price_avg_new_vacc","avg_new_tests_avg_new_cases"
-df_q2_cor_time = D1 %>% mutate(start_date = df_q2_date$V1, avg_new_tests_avg_new_cases = D2$estimate)
-#cor_df_time
-df_q2_cor_time$start_date = as.Date(df_q2_cor_time$start_date)
-df_q2_cor_time = df_q2_cor_time[ , -which(names(df_q2_cor_time) %in% c("conf.int2","p.value"))]
-#df_q2_cor_time
+# classifying
+MLdata <- Prices_joined %>% mutate(level = case_when((Prices_joined$Change.. <= 0.00) ~ "Low", (Prices_joined$Change.. > 0.00) ~ "High"))
+
+MLdata_filtered <- dplyr::select(MLdata,Date,level,Price,new_vaccinations,new_cases,new_tests) %>% na.omit()
+
+# making sure its named Price so that if we select another variable in the shiny app which is called something different it can be changed to Price as the name
+colnames(MLdata_filtered)[3] = "Price"
+
+MLdata_filtered$level <- as.factor(MLdata_filtered$level)
+
+
+# normalizing
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x))) }
+Norm_MLdata <- as.data.frame(lapply(MLdata_filtered[3:5], normalize)) 
+Norm_MLdata <- cbind(Norm_MLdata, MLdata_filtered[c("level", "Date")])
+
+# creating 80/20 split
+trainIndex <- createDataPartition(Norm_MLdata$level, p = 0.8, list = FALSE)
+data_test <- Norm_MLdata[trainIndex, ]
+data_train <- Norm_MLdata[-trainIndex, ]
+
+# define training control
+train_control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model_knn <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="knn")
+model_rpart <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="rpart")
+
+# PLS accuracy looked weird so i removed it and replaced it with rpart which works now because i fixed it
+#model_pls <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="pls")
+
+model_rda <- train(level~new_vaccinations+new_cases, data=data_train, trControl=train_control, method="rda")
+
+# KNN is best model so we are using that
+pred <- predict(model_knn, data_test)
+prediction_df <- cbind(pred, data_test)
 ```
 
-```{r}
-p1 = ggplot(data = df_q2_cor_time, aes(x = start_date)) + geom_line(aes(y=avg_new_tests_avg_new_cases, colour = "avg new_tests ~ avg new_cases"), size = 0.8) +
-  geom_line(aes(y=avg_price_avg_new_vacc, colour = 'avg price ~ avg new_vacc'), size = 0.8) +
-  scale_colour_manual("", 
-                      values = c("avg new_tests ~ avg new_cases"="#FF00CC", "avg price ~ avg new_vacc"="#3333FF")) +
-  ggtitle("Price~New_vaccinations, New_tests~New_cases") + xlab("Date") +
-  ylab("Coorelation")+
-  #scale_fill_manual(values = c("light green", "yellow"))+
-  theme_bw()
+
+```{r, include=FALSE, warning=FALSE}
+par(mfrow=c(3,1))
+boxplot(model_knn$results$Accuracy, ylab = "knn",xlab = "Accuracy", horizontal = TRUE)
+#boxplot(model_pls$results$Accuracy, ylab = "pls",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_rda$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
+boxplot(model_rpart$results$Accuracy, ylab = "rda",xlab = "Accuracy", horizontal = TRUE)
 ```
 
-```{r, fig.height=6, fig.width=10}
-ggplotly(p1)
+### Algorithm
+The algorithm utilized the machine learning model, and attempted to transform it into a feasible and practical model which would be realistically applied within markets. This is vital in order to integrate necessary training parameters such as portfolio risk, size, entries and exit trades. As the KNN model had the best performance, we adopted it in the finalized trading model to interact with our algorithm.   The rules based algorithm is based on moving exponential averages, a type of rolling window statistic typically used in trading. 
+
+The rules based algorithm involves pairing a slow exponential moving average and a fast exponential moving average and executing trades when these rolling statistics cross forming the bases of a crossover strategy (Chen, 2021). In the context of our final model, a long trade (buying with the market) will be executed when the fast moving average crosses above the slow moving average and when the machine learning model predicts a ‘high’, and vice versa for a short position (betting against the market). Trades will also be held until these conditions are void. In other worlds the rules based strategy consults the machine learning model for a finalized trade.
+
+Our report model has used these as our default settings
+
+- slow moving average - 100 (days)
+
+- fast moving average - 50 (days)
+
+- portfolio risk - 1 (corresponding to 100%)
+
+- asset/index - S&P 500 index
+
+
+```{r, include=FALSE, warning=FALSE}
+# data joining so we are able to consult the ML model
+algo_df <- inner_join(prediction_df[c("Date", "pred")], MLdata_filtered, by = "Date")
+algo_df$Date <- as.Date(algo_df$Date)
+
+
+# simple fast moving crossover over slow moving average algo
+
+
+port.Risk <- 1
+fast_moving_average <- 50
+slow_moving_average <- 100
+
+
+algo_df <- algo_df %>%
+  arrange(Date) %>% 
+  mutate(profit.loss = replace_na(Price/lag(Price) - 1, 0),
+         
+         # using exponential moving averages
+         Average.fast.moving = EMA(Price, fast_moving_average),
+         Average.slow.moving = EMA(Price, slow_moving_average),
+         
+         # meeting conditions of indicators and consulting the machine learning model
+         position = if_else(Average.fast.moving < Average.slow.moving & pred == "Low", -1, 1) %>% lag() %>% replace_na(0),
+
+         # PNL calc
+         PNL = position * profit.loss * port.Risk
+)
+
+# creating xts object
+Algo_xts <- xts(algo_df$PNL, order.by = algo_df$Date)
+
+########### These are the results for trading the algo for the S&P500
 ```
 
-A decrease in trend for the pink line (i.e. the correlation of average new tests and average new cases of each month) appears on the plot. This possibly is as a result of reduced testing as the pandemic progressed whilst the number of cases remained steady or increased, causing correlation between the 2 variables to decline. Furthermore, the blue line, depicting average new vaccinations and price, started to show a relatively steady trend towards August of 2021. We inferred that the trend might correspond to vaccination rates rising which allowed the return of normal living, thus influencing the equity markets to also return to a steady pattern.
-To analyze how the equity market behaved integrally during the epidemic period, we made a machine learning model. The process of making models, further analyzing and evaluation of models will be stated specifically below. 
 
-## Develop model
-
-2333
-
-# Results
+```{r, fig.height=7, fig.width=11, include=FALSE, warning=FALSE}
+# summary with charting
+charts.PerformanceSummary(Algo_xts)
+```
 
 
+## Shiny App
+Our Shiny app consists of 5 sections, the first section containing a brief overview of analyzing distribution of gains and losses over pandemic for respective country stock markets. Then we examined the correlation of vaccine manufacturers compared to typical stocks. In the second section, we generated the Covid data plot and matrix which shows the trend of covid infections. In the third section, it includes our model accuracy. Furthermore, the dashboard contains our prediction model. By inputting the respective parameters and selecting the corresponding stock market, we can have a prediction on the cumulative return. 
 
+# Discussion of Results & Limitations
 
-# Discussion
+# Phase 1 
+Our examination of Covid data in the context of a financial based analysis has yielded interesting results. Primarily, our initial analysis in section 1 concluded significant reactionary behavior in the stock market from the excessive kurtosis in the boxplots. Excessive kurtosis refers to the extremity of the tails considering the aggressiveness of the outliers which suggests thicker tails compared to a typical normal distribution. Furthermore we noticed that there was also recovery evident with stabilization among the second and third years shifting the behavior of the stock market. These findings are highly consistent with covid crisis and represents the shift in behavior in the stock market. This initial analysis is vital in forming the basis of our hypothesis that the stock market is influenced by covid related factors.
 
+# Phase 2
+The first correlation model explored whether US based vaccine manufacturers were anomalous during covid showed promising findings. We selected the US as it displayed aggressive behavior from phase 1 and also among the most traded indices in the world allowing for an effective analysis (). From the 150 day window, the three most uncorrelated assets were vaccine manufacturers which all reached a negative correlation at one point in time and also were the only assets to do so. Interestingly, Pfizer's behavior significantly altered over time as it slowly decreased in correlation as the pandemic progressed. All assets displayed some sort of a hit with a general decreasing trend to the overall market. Ultimately, these findings indicate that there are significant effects on assets particularly for vaccine manufacturers due to covid related factors. This again shows evidence for a significant type of reactionary behavior that we have seen within an isolated analysis particularly in the US. 
+ 
+The second question explores correlation modeling of these variables with our correlation matrix highlighting no clear way of defining an immediate price relationship even though a reactionary behavior in the stock market during covid can be observed. This is with the exception of vaccines and price which feature moderate correlation highlighting that the vaccine rollout was potentially aligned with market recovery. This is possible due to vaccine rollout consequently resulting in economic influx with lifted lockdowns. A study in the International Journal of Financial Analysis revealed a 0.2271% drop in stock market volatility after vaccine rollouts. Furthermore, in countries with consistent vaccination rates, stock market volatility was further reduced by 0.2041% (Rouatbi,2021). which supports the argument that the rollout of vaccines uplifted psychological factors in investors resulting in increased investor motivation.  Additionally, the blue line in the rolling 1 month correlation plot did increase initially but eventually subsided and stabilized indicating a low moderate correlation. This revealed that there were initial correlations with the rollout as described previously but diminished and stabilized over time. On the other hand, the pink line decreased over time indicating a potential decrease in testing as the pandemic continued to increase with subsequent Covid variants.
 
+# Phase 3
+It is important to note that for the purpose of this report, the finalized algorithm was run on the S&P 500 index which would typically be bought through its respective ETF. Additionally, as mentioned earlier, the Shiny app developed for our client allows experimentation with a variety of US based stocks, but this report focuses only on the S&P500 using default settings for the algorithm.
+
+It is also vital to justify the accuracy of the machine learning model. Primarily, the accuracies from the model were suboptimal, however, our team has given lenience to this considering that generally it is very difficult to effectively predict the stock market with even 60+ percent being a usable model. The KNN model will form the basis of the machine learning side of the algorithm and will be one part of a larger algorithm that will be utilized for trading the market. The reason why a pure machine learning model on its own is not useful is because it exhibits a plethora of limitations making it difficult to implement with success. One of these limitations include that a machine learning model on its own, avoids many general trading heuristics (such as executing a long trade in a downtrend), and due to having a small training set and simple underlying build, is still very rough and far from an institutional level algorithm which has a depth of optimisation. Furthermore, a machine learning model on its own simply estimates a classifier for either a positive or negative day and is not practical algorithmically on its own as it does not actually account for set parameters regarding entry, exits, portfolio size risk and such.
+
+For this reason our team decided to build a working stock trading algorithm based on fast exponential moving average crossovers which would then consult and take advice from the machine learning model in terms of executing a finalized trade. Therefore this strategy aims to utilize the machine learning model as a type of exotic indicator which adds confirmation to a trade. This also highlights one of the key creative innovations that our team has demonstrated throughout the project which looks at utilizing an exotic machine learning based model built from covid data to assist a rule based algorithm to create our final algorithmic trading model. Its performance varies depending on parameters and asset, but for the S&P 500 under default settings it has generated a worthy 21.9% return on investment, however, it has endured some serious drawdown over 2022 of 12.9% percent at its peak. This indicates the model may have long term performance issues, though, the 2022 market has been in a downtrend indicating general trading difficulty for most traders. Ultimately this highlights that covid data can be used in conjunction with an algorithm, however, it is important to realize that this model comes with a plethora of limitations which needs to be recognised.
+
+# limitations
+During the process of finding correlations between our interested variables, we realized that there are too many biases behind covid variables. It’s hard to make a linear or polynomial model, therefore, we focus on the correlation between variables over epidemic periods and then use KNN, RPART and RDA algorithms to do machine learning.
+It should be noted that the machine learning aspect of the model underperformed to our intended expectations given the efficacy and size of the underlying training data. Furthermore, it is vital to understand that Covid is a situation that is rapidly evolving and highly unpredictable. Due to this, the model is potentially training on old types of markets which have already shifted in behavior when the model is practically applied. Potential mitigations to this include retraining the model to recalculate its assessment of positions over time. In addition to this, slippage and commission (addition parameters when practically trading a market) have not been factored into the algorithm due to its extensive coding requirements and variance among brokers. Finally, historical performance in no way guarantees future performance meaning that this highly unique market may not uphold and future performance may drastically vary.
+
+# Future applications
+Improvements to the KNN algorithm can include feature selection to improve accuracy (Benbouziane 2022) This may include specific data on Vaccination and death rate of the Vaccinated, or new cases in vaccinated populations. Applying the feature selection process will consist of  removing the less important  features from  the dataset  and  identifying  the variables  that  most contribute  to the prediction of our target variable to  reduce overfitting problems and achieve a better  prediction accuracy.
 
 # Conclusion
+Our group combines covid data and Stock Quotes data to analyze the effects of Covid-19 on relevant public equity markets. We have found the prices of equity markets are closely related to this global pandemic by collecting the information from leading countries (Australia, Japan, India, USA and China) and analyzing it via the correlation matrices. We obtain the daily stock prices for 15 kinds of stocks from USA stock market, which is universally-acknowledged as a typical one, through a financial database from yahoo, and selected 4 variables (Price, new_vaccinations, new_testsand new_cases) and using the trading algorithm, then using machine learning models(KNN,PDA,RPART) to make a prediction. We also developed a shiny app as a guide for retail traders and investors. As a result, the users can have a clear understanding of the impact of Covid-19 on the stock market, based on which they can make wiser investment decisions.
 
-Our group combines omics and Stock Quotes data to analyze the effects of Covid-19 on relevant public equity markets. We have found the prices of equity markets are closely related to this global pandemic by collecting the information from leading countries (Australia, Japan, India, USA and China) and analyzed it via the linear regressions and correlation matrices. We obtained the daily stock prices for 15 kinds of stocks from USA stock market, which is universally-acknowledged as a typical one, through a financial database from yahoo, and then using machine learning models (KNN, RDA, RPART) to make a predication. We also developed a shiny app as a guide for retail traders and investors. As a result, the users can have a clear understanding of the impact of Covid-19 on the stock market, based on which they can make wiser investment decisions.
+# Group contributions
 
-
-# Group Contribution
+Group contributions were divided into 3 sections. Section 1 included data cleaning and acquisition as well as basic data visualization which included box plots depicting the gains and losses of each stock market done by Maxim. Section 2 included analyses of data to find correlations including using linear/polynomial regression, and creating correlation matrices and graphs in which only the later were used. This was done by Christin(Ruoshui) and Jasmine. Section 3 was modeling and machine learning algorithms KNN, RPART and RDA. This was completed by Marin(Zhe), Paul(Shihan) and Maxim. Contributions to the shiny app with Jinting coding the Shiny app and Marin, Paul, Maxim and Jasmine contributing information and research for the website. Oral presentation was conducted by Maxim, Jasmine, Jia and Jinting, with slide creation and editing done by Christin, Paul, Marin and Maxim. Report had full group contribution; discussions and editing from Maxim, Introductions/backgrounds, referencing, and editing from Jasmine, Executive summary by Jia, correlation analysis and result by Christin, model development and research by Paul and Marin, Machine learning model and algorithm done by Jinting and Marin and lastly conclusion written by Marin. 
 
 
 # References
 
+- Chen, J. (2021). Crossover Definition. Retrieved 1 June 2022, from https://www.investopedia.com/terms/c/crossover.asp
+
+- Frazier, L. (2022). The Coronavirus Crash Of 2020, And The Investing Lesson It Taught Us. Retrieved 31 May 2022, from https://www.forbes.com/sites/lizfrazierpeck/2021/02/11/the-coronavirus-crash-of-2020-and-the-investing-lesson-it-taught-us/?sh=11817a8d46cf
+
+- Jareño, F., & Negrut, L. (2016). US stock market and macroeconomic factors. Journal of Applied Business Research (JABR), 32(1), 325-340.
+
 - Harjoto, M., Rossi, F., Lee, R., & Sergi, B. (2021). How do equity markets react to COVID-19? Evidence from emerging and developed countries. Journal Of Economics And Business, 115, 105966. https://doi.org/10.1016/j.jeconbus.2020.105966
+
+- Mazur, M., Dang, M., & Vega, M. (2021). COVID-19 and the march 2020 stock market crash. Evidence from S&amp;P1500. Finance Research Letters, 38, 101690. doi: 10.1016/j.frl.2020.101690
+
+- Nouria, Bouriche & Benbouziane, Mohamed. (2022). Predicting the Direction of E-Commerce Stock Prices during COVID 19 Using Machine Learning ‫ا. 10. 462-473. 
+
+- Rouatbi, W., Demir, E., Kizys, R., & Zaremba, A. (2021). Immunizing markets against the pandemic: COVID-19 vaccinations and stock volatility around the world. International Review Of Financial Analysis, 77, 101819. doi: 10.1016/j.irfa.2021.101819
 
 - Seven, Ü., & Yılmaz, F. (2021). World equity markets and COVID-19: Immediate response and recovery prospects. Research In International Business And Finance, 56, 101349. https://doi.org/10.1016/j.ribaf.2020.101349
